@@ -1,20 +1,15 @@
 import { Component } from '@angular/core';
-import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {ZardDropdownModule} from '@shared/components/dropdown/dropdown.module';
 import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
 
 @Component({
   selector: 'app-profile-menu',
-  imports: [ZardDropdownModule, ZardButtonComponent, ZardAvatarComponent],
+  imports: [ZardDropdownModule, ZardAvatarComponent],
   template: `
     <div>
-
-      <div class="flex items-center gap-4 py-2 px-4 rounded-md hover:bg-accent hover:text-accent-foreground" z-dropdown [zDropdownMenu]="menu">
+      <div class="flex items-center gap-4 py-2 px-4 rounded-md hover:bg-accent/50 hover:text-accent-foreground" z-dropdown [zDropdownMenu]="menu">
         <z-avatar [zImage]="{fallback: 'Y'}" class="w-8 h-8" />
-        <div class="flex items-center">
-          Your Name
-          <i class="icon-chevron-down ml-1"></i>
-        </div>
+        Your Name
       </div>
       <z-dropdown-menu-content #menu="zDropdownMenuContent" class="w-56">
         <z-dropdown-menu-label>My Account</z-dropdown-menu-label>
