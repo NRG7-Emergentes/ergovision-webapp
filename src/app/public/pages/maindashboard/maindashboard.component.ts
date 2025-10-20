@@ -4,9 +4,9 @@ import { Component } from '@angular/core';
   selector: 'app-maindashboard',
   imports: [],
   template: `
-    <p>
-      maindashboard works!
-    </p>
+    <div class="bg-background">
+      asdf
+    </div>
   `,
   styles: ``
 })
