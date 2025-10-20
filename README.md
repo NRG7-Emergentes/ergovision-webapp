@@ -1,6 +1,6 @@
 # ErgoVision Frontend
 
-A modern web application for the ErgoVision project, built with Angular and designed for ergonomic workspace monitoring and analysis.
+A  web application for the ErgoVision project, built with Angular and designed for ergonomic workspace monitoring and analysis.
 
 ## Technologies
 
@@ -11,8 +11,7 @@ This project is built with :
 - **TypeScript 5.9**
 
 ### UI & Styling
-- **Tailwind CSS 4.1** 
-- **Tailwind Animate** 
+- **Tailwind CSS 4.1**
 - **Lucide Icons** 
 - **Inter Geist Font** 
 - **ZardUI** [components](https://zardui.com/) 
@@ -23,11 +22,11 @@ This project is built with :
 - **Node.js** (v18 or higher recommended)
 - **npm** (comes with Node.js)
 
-## 🛠️ Installation
+## Installation
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/NRG7-Emergentes/ergovision-webapp
 cd ergovision-frontend
 ```
 
