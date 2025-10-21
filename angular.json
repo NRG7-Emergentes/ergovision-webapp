@@ -24,6 +24,9 @@
                 "input": "public"
               }
             ],
+            "scripts": [
+              "node_modules/apexcharts/dist/apexcharts.min.js"
+            ],
             "styles": [
               "src/styles.css"
             ]
