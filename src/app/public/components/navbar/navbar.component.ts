@@ -23,15 +23,15 @@ import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovi
           </div>
           <nav>
             <div class="relative">
-              <button z-button zType="ghost" >
+              <button z-button zType="ghost" class="text-muted-foreground" >
                 Dashboard
               </button>
 
-              <button z-button zType="ghost" >
+              <button z-button zType="ghost" class="text-muted-foreground">
                 Monitoring
               </button>
 
-              <button z-button zType="ghost" >
+              <button z-button zType="ghost" class="text-muted-foreground">
                 Progress
               </button>
 
