@@ -12,7 +12,8 @@ export type ChartOptions = {
   series: ApexAxisChartSeries;
   chart: ApexChart;
   xaxis: ApexXAxis;
-  title: ApexTitleSubtitle;
+  plotOptions: ApexPlotOptions;
+  tooltip: ApexTooltip;
 };
 
 
@@ -33,7 +34,8 @@ export type ChartOptions = {
           [series]="chartOptions.series"
           [chart]="chartOptions.chart"
           [xaxis]="chartOptions.xaxis"
-          [title]="chartOptions.title"
+          [plotOptions]="chartOptions.plotOptions"
+          [tooltip]="chartOptions.tooltip"
         ></apx-chart>
       </div>
     </div>
@@ -49,18 +51,30 @@ export class ProgressChartComponent {
     this.chartOptions = {
       series: [
         {
-          name: "My-series",
-          data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
+          name: "score",
+          data: [10, 41, 35, 51, 49, 62, 69]
         }
       ],
       chart: {
         height: 350,
-        type: "bar"
+        type: "bar",
+        foreColor: "#FFFFFF",
+        toolbar: {
+          show: false
+        }
       },
-      title: {
+      plotOptions: {
+        bar: {
+          borderRadius: 10,
+          borderRadiusApplication: 'end'
+        }
       },
       xaxis: {
-        categories: ["Jan", "Feb",  "Mar",  "Apr",  "May",  "Jun",  "Jul",  "Aug", "Sep"]
+        categories: ["Mon", "Tue",  "Wed",  "Thu",  "Fri",  "Sat",  "Sun"]
+      },
+      tooltip: {
+        theme: 'dark',
+        fillSeriesColor: false
       }
     };
   }
