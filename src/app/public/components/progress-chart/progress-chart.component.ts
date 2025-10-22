@@ -14,6 +14,8 @@ export type ChartOptions = {
   xaxis: ApexXAxis;
   plotOptions: ApexPlotOptions;
   tooltip: ApexTooltip;
+  grid: ApexGrid;
+  yaxis: ApexYAxis;
 };
 
 
@@ -36,6 +38,8 @@ export type ChartOptions = {
           [xaxis]="chartOptions.xaxis"
           [plotOptions]="chartOptions.plotOptions"
           [tooltip]="chartOptions.tooltip"
+          [grid]="chartOptions.grid"
+          [yaxis]="chartOptions.yaxis"
         ></apx-chart>
       </div>
     </div>
@@ -75,6 +79,21 @@ export class ProgressChartComponent {
       tooltip: {
         theme: 'dark',
         fillSeriesColor: false
+      },
+      grid: {
+        yaxis: {
+          lines: {
+            show: false
+          }
+        }
+      },
+      yaxis: { // <-- Add this object
+        axisBorder: {
+          show: true // This shows the main vertical Y-axis line
+        },
+        axisTicks: {
+          show: true // This shows the small tick marks next to the numbers
+        }
       }
     };
   }
