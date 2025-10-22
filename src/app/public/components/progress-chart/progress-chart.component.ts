@@ -5,19 +5,16 @@ import {
   ApexAxisChartSeries,
   ApexChart,
   ApexXAxis,
-  ApexDataLabels,
-  ApexTooltip,
-  ApexStroke
+  ApexTitleSubtitle
 } from "ng-apexcharts";
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
   chart: ApexChart;
   xaxis: ApexXAxis;
-  stroke: ApexStroke;
-  tooltip: ApexTooltip;
-  dataLabels: ApexDataLabels;
+  title: ApexTitleSubtitle;
 };
+
 
 
 @Component({
@@ -36,9 +33,7 @@ export type ChartOptions = {
           [series]="chartOptions.series"
           [chart]="chartOptions.chart"
           [xaxis]="chartOptions.xaxis"
-          [stroke]="chartOptions.stroke"
-          [tooltip]="chartOptions.tooltip"
-          [dataLabels]="chartOptions.dataLabels"
+          [title]="chartOptions.title"
         ></apx-chart>
       </div>
     </div>
@@ -46,6 +41,7 @@ export type ChartOptions = {
   styles: ``
 })
 export class ProgressChartComponent {
+
   @ViewChild("chart") chart: ChartComponent | undefined;
   public chartOptions: ChartOptions;
 
@@ -53,40 +49,18 @@ export class ProgressChartComponent {
     this.chartOptions = {
       series: [
         {
-          name: "series1",
-          data: [31, 40, 28, 51, 42, 109, 100]
-        },
-        {
-          name: "series2",
-          data: [11, 32, 45, 32, 34, 52, 41]
+          name: "My-series",
+          data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
         }
       ],
       chart: {
         height: 350,
-        type: "area"
+        type: "bar"
       },
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        curve: "smooth"
+      title: {
       },
       xaxis: {
-        type: "datetime",
-        categories: [
-          "2018-09-19T00:00:00.000Z",
-          "2018-09-19T01:30:00.000Z",
-          "2018-09-19T02:30:00.000Z",
-          "2018-09-19T03:30:00.000Z",
-          "2018-09-19T04:30:00.000Z",
-          "2018-09-19T05:30:00.000Z",
-          "2018-09-19T06:30:00.000Z"
-        ]
-      },
-      tooltip: {
-        x: {
-          format: "dd/MM/yy HH:mm"
-        }
+        categories: ["Jan", "Feb",  "Mar",  "Apr",  "May",  "Jun",  "Jul",  "Aug", "Sep"]
       }
     };
   }
