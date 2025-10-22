@@ -7,7 +7,7 @@ import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
   imports: [ZardDropdownModule, ZardAvatarComponent],
   template: `
     <div>
-      <div class="flex items-center gap-4 py-2 px-4 rounded-md hover:bg-accent/50 hover:text-accent-foreground bg-card border p-6 shadow-sm text-card-foreground" z-dropdown [zDropdownMenu]="menu">
+      <div class="flex items-center gap-4 py-2 px-4 rounded-md hover:bg-accent/50 hover:text-accent-foreground bg-card border p-6 shadow-sm text-card-foreground transition-colors" z-dropdown [zDropdownMenu]="menu">
         <z-avatar [zImage]="{fallback: 'Y'}" class="w-8 h-8" />
         Your Name
       </div>
