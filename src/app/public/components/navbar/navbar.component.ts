@@ -3,6 +3,7 @@ import {ProfileMenuComponent} from '@app/public/components/profile-menu/profile-
 import {ZardMenuModule} from '@shared/components/menu/menu.module';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -10,7 +11,8 @@ import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovi
     ProfileMenuComponent,
     ZardMenuModule,
     ZardButtonComponent,
-    ErgovisionLogoComponent
+    ErgovisionLogoComponent,
+    RouterLink
   ],
   template: `
     <header class="border-b">
@@ -22,20 +24,10 @@ import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovi
             <h1 class="text-xl font-bold"> ErgoVision </h1>
           </div>
           <nav>
-            <div class="relative">
-              <button z-button zType="ghost" class="text-muted-foreground" >
-                Dashboard
-              </button>
-
-              <button z-button zType="ghost" class="text-muted-foreground">
-                Monitoring
-              </button>
-
-              <button z-button zType="ghost" class="text-muted-foreground">
-                Progress
-              </button>
-
-
+            <div class="relative flex items-center gap-2">
+              <a routerLink="/dashboard/1" z-button zType="ghost" class="text-muted-foreground">Dashboard</a>
+              <a routerLink="/monitoring/start" z-button zType="ghost" class="text-muted-foreground">Monitoring</a>
+              <a routerLink="/" z-button zType="ghost" class="text-muted-foreground">Progress</a>
             </div>
           </nav>
         </div>

@@ -59,4 +59,8 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "~5.9.2"
   }
+  ,
+  "optionalDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "file:vendor/@rollup/rollup-win32-x64-msvc"
+  }
 }
