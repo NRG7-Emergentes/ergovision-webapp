@@ -1,25 +1,44 @@
 import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output } from '@angular/core';
 import { SessionSummary } from '../../services/history.service';
+import {UpperCasePipe} from '@angular/common';
 
 @Component({
   selector: 'app-session-card',
   template: `
-    <div class="card">
-      <div class="left">
-        <div class="id">ID: {{ session.id }}</div>
-        <div class="meta">{{ session.date }} • {{ session.duration }}</div>
+    <div
+      class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm">
+      <div class="flex items-center gap-4">
+        <div
+          class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold bg-indigo-600"
+        >
+          {{ session.id.charAt(0) | uppercase }}
+        </div>
+
+        <div class="min-w-0">
+          <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">ID: {{ session.id }}</div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{{ session.date }}</div>
+        </div>
       </div>
-      <div class="right">
-        <button type="button" aria-label="View session details" (click)="onDetail()">Detail</button>
+
+      <div class="flex items-center gap-3">
+        <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full">
+          {{ session.duration }}
+        </span>
+
+        <button
+          type="button"
+          (click)="onDetail()"
+          class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          Detail
+        </button>
       </div>
     </div>
   `,
-  styles: [`
-    .card { display:flex; justify-content:space-between; align-items:center; padding:8px; border:1px solid #ddd; border-radius:4px; }
-    .left { display:flex; flex-direction:column; }
-    .id { font-weight:600; }
-    .meta { color:#666; font-size:0.9em; }
-  `],
+  styles: [``],
+  imports: [
+    UpperCasePipe
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SessionCardComponent {
@@ -27,7 +46,6 @@ export class SessionCardComponent {
   @Output() detailClick = new EventEmitter<string>();
 
   onDetail() {
-    // only emit id; navigation handled by parent (HistoryPageComponent)
     this.detailClick.emit(this.session.id);
   }
 }
