@@ -1,46 +1,32 @@
-import { Component, ChangeDetectionStrategy, signal, OnInit, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HistoryService, SessionSummary } from '../../services/history.service';
-import { CommonModule, NgForOf, NgIf } from '@angular/common';
-import { StatsSummaryComponent } from '@app/public/components/stats-summary/stats-summary.component';
+import { SessionCardComponent } from '../../components/session-card/session-card.component';
+import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-history-page',
   standalone: true,
-  imports: [CommonModule, NgForOf, NgIf, StatsSummaryComponent],
+  imports: [SessionCardComponent, NgForOf, NgIf],
   template: `
+    <div class="max-w-4xl mx-auto py-8 px-4">
+      <header class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">History</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">List of monitored sessions — click Detail to view metrics.</p>
+      </header>
 
-    <h2>History</h2>
-    <div *ngIf="sessions().length === 0">No sessions found.</div>
+      <div *ngIf="sessions().length === 0" class="text-sm text-gray-500">No sessions found.</div>
 
-    <ul class="list">
-      <li *ngFor="let s of sessions()">
-        <div class="card-row">
-          <div class="left">
-            <div class="id">ID: {{ s.id }}</div>
-            <div class="meta">{{ s.date }} • {{ s.duration }}</div>
-          </div>
-          <div class="right">
-            <button type="button" (click)="goDetail(s.id)">Detail</button>
-          </div>
-        </div>
-      </li>
-    </ul>
+      <div class="space-y-3">
+        <app-session-card
+          *ngFor="let s of sessions()"
+          [session]="s"
+          (detailClick)="goDetail($event)"
+        ></app-session-card>
+      </div>
+    </div>
   `,
-  styles: [`
-    .list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .card-row { display:flex; justify-content:space-between; align-items:center; padding:8px; border:1px solid #ddd; border-radius:4px; }
-    .left { display:flex; flex-direction:column; }
-    .id { font-weight:600; }
-    .meta { color:#666; font-size:0.9em; }
-  `],
+  styles: [``],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HistoryPageComponent implements OnInit {
