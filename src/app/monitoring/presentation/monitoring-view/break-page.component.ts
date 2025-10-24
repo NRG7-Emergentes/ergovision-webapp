@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavbarComponent } from '@app/public/components/navbar/navbar.component';
 import { FooterComponent } from '@app/public/components/footer/footer.component';
@@ -20,8 +20,8 @@ function msToHms(ms: number) {
     <div class="break-wrap">
       <div class="break-panel">
         <div class="summary">
-          <div class="box">Break Time<br/><strong>00:05:55</strong></div>
-          <div class="box">You took 2 breaks today</div>
+          <div class="box">Break Time<br/><strong>{{ msToHms(stats.pauseMs) }}</strong></div>
+          <div class="box">You took {{ stats.pauseCount }} breaks today</div>
         </div>
         <div class="exercises">
           <div class="exercise"> <img src="/assets/ex1.jpg"/> </div>
@@ -35,17 +35,23 @@ function msToHms(ms: number) {
     </div>
   `,
   styles: [`
-    .break-wrap{padding:24px;display:flex;justify-content:center}
-  .break-panel{width:980px;max-width:100%;background:var(--card);padding:20px;border-radius:8px}
-    .summary{display:flex;gap:12px}
-    .box{flex:1;background:#e9ecef;padding:12px;border-radius:8px;text-align:center}
-    .exercises{display:flex;gap:12px;margin-top:12px}
-    .exercise img{width:180px;height:100px;object-fit:cover;border-radius:8px}
-    .actions{margin-top:16px;text-align:center}
-    .btn.primary{background:var(--primary);color:white}
+  .break-wrap{padding:12px;display:flex;justify-content:center;min-height:calc(100vh - 88px)}
+  .break-panel{width:1400px;max-width:95vw;background:var(--card);padding:36px;border-radius:12px;max-height:calc(100vh - 120px);overflow:auto}
+  .summary{display:flex;gap:22px}
+  .box{flex:1;background:#e9ecef;padding:28px;border-radius:12px;text-align:center;font-size:18px;max-height:50vh;overflow:auto}
+  .exercises{display:flex;gap:20px;margin-top:26px}
+  .exercise img{width:340px;height:190px;object-fit:cover;border-radius:12px}
+  .actions{margin-top:26px;text-align:center}
+  .btn.primary{background:var(--primary);color:white;padding:20px 26px;font-size:20px;border-radius:12px}
   `]
 })
 export class BreakPageComponent {
+  stats = { totalMs: 0, goodMs: 0, badMs: 0, pauseMs: 0, pauseCount: 0 };
   constructor(private monitoringSvc: MonitoringService, private router: Router) {}
+
+  ngOnInit(): void {
+    this.stats = this.monitoringSvc.getStats();
+  }
+
   onBack() { this.router.navigate(['/monitoring/start']); }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavbarComponent } from '@app/public/components/navbar/navbar.component';
 import { FooterComponent } from '@app/public/components/footer/footer.component';
@@ -28,8 +28,8 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
           </div>
 
           <div class="stats-box">
-            <div class="info-card">Good posture Time: <strong>01:24:23</strong></div>
-            <div class="info-card">Active break duration: <strong>00:00:32</strong></div>
+            <div class="info-card">Good posture Time: <strong>{{ goodTime }}</strong></div>
+            <div class="info-card">Active break duration: <strong>{{ totalTime }}</strong></div>
           </div>
         </main>
 
@@ -49,30 +49,64 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
     
   `,
   styles: [`
-    :host { --monitor-video-height: 70vh; display:block }
-    .content{display:flex;gap:24px;padding:12px 20px;align-items:flex-start;width:100%;max-width:100vw}
-    .main-col{flex:1;max-width:1200px}
-    .sidebar{width:360px}
-    .video-card{background:#ffffff;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.08);overflow:hidden}
-    .video-wrap{height:var(--monitor-video-height);width:100%;overflow:hidden}
-    .monitor-video{width:100%;height:100%;object-fit:cover;display:block}
+  :host { --monitor-video-height: 60vh; display:block }
+  /* layout tuned so camera is wider and taller */
+  .content{display:flex;gap:20px;padding:12px 20px;align-items:flex-start;width:100%;max-width:100vw;min-height:calc(100vh - 88px)}
+  .main-col{flex:1;max-width:2200px;margin-left:20px;display:flex;flex-direction:column}
+  /* widen the sidebar so settings take more horizontal space and avoid vertical scroll */
+  .sidebar{width:420px;flex:0 0 420px;display:flex;flex-direction:column}
+  .video-card{background:#ffffff;border-radius:10px;box-shadow:0 8px 24px rgba(2,6,23,0.12);overflow:hidden;display:flex;flex-direction:column;min-height:var(--monitor-video-height);max-height:var(--monitor-video-height)}
+  .video-wrap{height:100%;width:100%;overflow:hidden;flex:1}
+  .monitor-video{width:100%;height:100%;object-fit:cover;display:block}
+  .video-card{margin-left:20px}
+    /* larger UI: buttons, settings */
+  .controls .btn{margin-left:12px;padding:18px 24px;border-radius:10px;border:0;cursor:pointer;font-weight:700;font-size:20px}
+  .start-area .btn{padding:16px 22px;font-size:18px}
+  /* remove forced heights and scrolling inside the settings card so it can expand horizontally */
+  .settings.card{padding:24px;border-radius:12px;font-size:18px;display:flex;flex-direction:column;justify-content:flex-start;overflow:visible;max-height:none;min-height:auto;width:100%}
+  .monitoring-page, .content { box-sizing: border-box; }
+    .stats-box{display:flex;gap:20px;margin-top:18px}
     .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6}
     .note{color:#6b7280;font-size:13px}
-    .controls .btn{margin-left:10px;padding:10px 16px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
     .btn.primary{background:#2563eb;color:white}
     .btn.success{background:#10b981;color:white}
     .recommendations.card{background:#f8fafc;padding:18px;border-radius:10px}
     .info-row{display:flex;gap:14px;margin-top:14px}
     .info-card{flex:1;background:#f3f4f6;padding:14px;border-radius:8px;text-align:center;font-weight:600}
-    .stats-box{display:flex;gap:14px;margin-top:14px}
-    .settings.card{padding:16px;border-radius:8px;background:var(--card)}
+  .settings.card{padding:16px;border-radius:8px;background:var(--card)}
     .start-area{display:flex;gap:12px;margin-top:12px}
     .btn.destructive{background:var(--destructive);color:white}
   `]
 })
 export class ActiveMonitoringComponent {
+  totalTime = '00:00:00';
+  goodTime = '00:00:00';
+  private _interval: any;
+
   constructor(private monitoringSvc: MonitoringService, private router: Router) {}
+
+  ngOnInit(): void {
+    this._interval = setInterval(() => this.refreshTimes(), 500);
+  }
+
+  ngOnDestroy(): void {
+    if (this._interval) clearInterval(this._interval);
+  }
 
   onPause() { this.monitoringSvc.pause(); }
   onEnd() { this.monitoringSvc.end(); this.router.navigate(['/monitoring/break']); }
+
+  private refreshTimes() {
+    const s = this.monitoringSvc.getStats();
+    this.totalTime = this.msToHms(s.totalMs);
+    this.goodTime = this.msToHms(s.goodMs);
+  }
+
+  private msToHms(ms: number) {
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  }
 }
