@@ -8,7 +8,7 @@ import {
   ApexTitleSubtitle
 } from "ng-apexcharts";
 
-export type ChartOptions = {
+export type ColumnChartOptions = {
   series: ApexAxisChartSeries;
   chart: ApexChart;
   xaxis: ApexXAxis;
@@ -29,7 +29,7 @@ export type ChartOptions = {
     <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
       <div class="flex flex-col">
         <span class="text-xl font-semibold text-foreground ">Score Progress</span>
-        <span class="text-xs text-muted-foreground font-semibold tracking-widest">Last 7 days</span>
+        <span class="text-xs text-muted-foreground font-medium tracking-widest">Last 7 days</span>
       </div>
       <div class="">
         <apx-chart
@@ -49,7 +49,7 @@ export type ChartOptions = {
 export class ProgressChartComponent {
 
   @ViewChild("chart") chart: ChartComponent | undefined;
-  public chartOptions: ChartOptions;
+  public chartOptions: ColumnChartOptions;
 
   constructor() {
     this.chartOptions = {

@@ -3,6 +3,7 @@ import {ProfileMenuComponent} from '@app/public/components/profile-menu/profile-
 import {ZardMenuModule} from '@shared/components/menu/menu.module';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -23,15 +24,15 @@ import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovi
           </div>
           <nav>
             <div class="relative">
-              <button z-button zType="ghost" class="text-muted-foreground" >
+              <button z-button zType="ghost" class="text-muted-foreground" (click)="goToDashboard()">
                 Dashboard
               </button>
 
-              <button z-button zType="ghost" class="text-muted-foreground">
+              <button z-button zType="ghost" class="text-muted-foreground" >
                 Monitoring
               </button>
 
-              <button z-button zType="ghost" class="text-muted-foreground">
+              <button z-button zType="ghost" class="text-muted-foreground" (click)="goToProgress()">
                 Progress
               </button>
 
@@ -46,5 +47,17 @@ import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovi
   styles: ``
 })
 export class NavbarComponent {
+
+  constructor(private router: Router) {
+  }
+
+  goToDashboard() {
+    this.router.navigate(['/dashboard/2d2631b8-0991-4934-a5a9-81c085d7f208']);
+  }
+
+  goToProgress() {
+    this.router.navigate(['/progress/2d2631b8-0991-4934-a5a9-81c085d7f208']);
+  }
+
 
 }

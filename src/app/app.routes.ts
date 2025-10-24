@@ -6,7 +6,7 @@ import {StatsPageComponent} from '@app/stats/presentation/stats-page/stats-page.
 
 export const routes: Routes = [
   { path: 'dashboard/:id' , component: MainDashboardComponent},
-  { path: 'statistics/:id' , component: StatsPageComponent},
+  { path: 'progress/:id' , component: StatsPageComponent},
   {path: 'monse', component: MonseCamComponent},
   { path: '' , component: TestPageComponent }
 ];

@@ -11,11 +11,11 @@ import {ZardButtonComponent} from '@shared/components/button/button.component';
       <div class="flex justify-between items-center">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-8 flex-1">
           <div class="flex flex-col">
-            <span class="text-xs text-muted-foreground mb-2 uppercase tracking-widest font-semibold"> welcome </span>
+            <span class="text-xs text-muted-foreground mb-2 uppercase tracking-widest font-medium"> welcome </span>
             <span class="text-3xl sm:text-4xl font-bold text-foreground tracking-tight"> Hello, Neo! </span>
           </div>
           <div class="flex flex-col items-center justify-center px-6 py-4 rounded-lg bg-background/50 border border-border">
-            <span class="text-xs text-muted-foreground mb-2 uppercase tracking-widest font-semibold"> last session </span>
+            <span class="text-xs text-muted-foreground mb-2 uppercase tracking-widest font-medium"> last session </span>
             <span class="text-4xl font-bold text-primary">82%</span>
           </div>
 
@@ -29,8 +29,7 @@ import {ZardButtonComponent} from '@shared/components/button/button.component';
                 🔥
               </span>
               <div>
-                <p class="text-xs text-muted-foreground uppercase tracking-widest font-semibold">Current
-                  Streak</p>
+                <p class="text-xs text-muted-foreground uppercase tracking-widest font-medium">Current Streak</p>
                 <p class="text-lg font-bold text-foreground">5 days</p>
               </div>
             </div>

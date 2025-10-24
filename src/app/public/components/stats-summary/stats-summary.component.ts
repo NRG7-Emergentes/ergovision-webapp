@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
         <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
           <div class="flex items-start justify-between mb-4">
             <div class="flex flex-col">
-              <span class="text-xs text-muted-foreground font-semibold uppercase tracking-widest">
+              <span class="text-xs text-muted-foreground font-medium uppercase tracking-widest">
                 last 7 days
               </span>
               <span class="text-sm font-semibold text-foreground ">Average Score</span>
@@ -32,7 +32,7 @@ import { Component } from '@angular/core';
         <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
           <div class="flex items-start justify-between mb-4">
             <div class="flex flex-col">
-              <span class="text-xs text-muted-foreground font-semibold uppercase tracking-widest">
+              <span class="text-xs text-muted-foreground font-medium uppercase tracking-widest">
                 this week
               </span>
               <span class="text-sm font-semibold text-foreground">Total Monitored Time</span>
@@ -52,7 +52,7 @@ import { Component } from '@angular/core';
         <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
           <div class="flex items-start justify-between mb-4">
             <div class="flex flex-col">
-              <span class="text-xs text-muted-foreground font-semibold uppercase tracking-widest">
+              <span class="text-xs text-muted-foreground font-medium uppercase tracking-widest">
                 main focus
               </span>
               <span class="text-sm font-semibold text-foreground ">Most Common Weak Point</span>
