@@ -6,7 +6,7 @@ import {Router} from '@angular/router';
   selector: 'app-test-page',
   imports: [ZardButtonComponent],
   template: `
-    <div class="w-full h-full flex flex-col gap-12 justify-center items-center text-center  ">
+    <div class="w-full h-full flex flex-col gap-12 justify-center items-center text-center">
       <div>
         <h1 class="text-6xl font-bold tracking-tight leading-tight ">
           <span class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 bg-clip-text text-transparent">ErgoVision</span>
