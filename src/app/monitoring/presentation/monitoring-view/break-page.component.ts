@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavbarComponent } from '@app/public/components/navbar/navbar.component';
 import { FooterComponent } from '@app/public/components/footer/footer.component';
-import { MonitoringService } from './monitoring.service';
+import { MonitoringService } from '@app/monitoring/presentation/monitoring-view/monitoring.service';
 import { ZardButtonComponent } from '../../../shared/components/button/button.component';
 
 function msToHms(ms: number) {
@@ -36,7 +36,7 @@ function msToHms(ms: number) {
   `,
   styles: [`
     .break-wrap{padding:24px;display:flex;justify-content:center}
-    .break-panel{width:900px;background:var(--card);padding:20px;border-radius:8px}
+  .break-panel{width:980px;max-width:100%;background:var(--card);padding:20px;border-radius:8px}
     .summary{display:flex;gap:12px}
     .box{flex:1;background:#e9ecef;padding:12px;border-radius:8px;text-align:center}
     .exercises{display:flex;gap:12px;margin-top:12px}

@@ -17,7 +17,6 @@ import { RouterLink } from '@angular/router';
   template: `
     <header class="border-b">
       <div class="container mx-auto flex items-center h-18 justify-between px-4 sm:px-6 lg:px-8">
-
         <div class="flex items-center gap-16">
           <div class="flex items-center gap-3">
             <app-ergovision-logo [size]="36"/>

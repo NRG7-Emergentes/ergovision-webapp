@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { MonitoringService } from './monitoring.service';
+import { MonitoringService } from '@app/monitoring/presentation/monitoring-view/monitoring.service';
 import { NavbarComponent } from '@app/public/components/navbar/navbar.component';
 import { MonitorCamComponent } from '@app/monitoring/components/monitor-cam/monitor-cam.component';
 import { ZardButtonComponent } from '../../../shared/components/button/button.component';
@@ -42,15 +42,19 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
     </div>
   `,
   styles: [`
-    :host { display: block; font-family: Inter, Arial, sans-serif; color:#111827 }
+  :host { --monitor-video-height: 70vh; display: block; font-family: Inter, Arial, sans-serif; color:#111827 }
     .topbar{height:56px;background:#0f172a;color:#fff;display:flex;align-items:center;gap:16px;padding:0 16px}
     .topbar .brand{font-weight:700}
     .topbar .nav{opacity:0.85}
-      .content{display:flex;gap:28px;padding:28px;align-items:flex-start}
-      .main-col{flex:1;max-width:980px}
-      .sidebar{width:340px}
-      .video-card{background:#ffffff;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.08);overflow:hidden}
-      .video-element{width:100%;height:440px;object-fit:cover;background:#000;display:block}
+  .content{display:flex;gap:24px;padding:12px 20px;align-items:flex-start;width:100%;max-width:100vw}
+  .main-col{flex:1;max-width:1200px}
+  .sidebar{width:360px}
+      /* ensure video area matches monitor height used across pages */
+      .video-wrap{height:var(--monitor-video-height);width:100%;overflow:hidden}
+      .monitor-video{width:100%;height:100%;object-fit:cover;display:block}
+  .video-card{background:#ffffff;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.08);overflow:hidden}
+  .video-wrap{height:var(--monitor-video-height);width:100%;overflow:hidden}
+  .monitor-video{width:100%;height:100%;object-fit:cover;display:block}
       .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6}
       .note{color:#6b7280;font-size:13px}
       .controls .btn{margin-left:10px;padding:10px 16px;border-radius:8px;border:0;cursor:pointer;font-weight:600}

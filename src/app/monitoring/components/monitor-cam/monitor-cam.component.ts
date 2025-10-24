@@ -6,13 +6,17 @@ import { FilesetResolver, PoseLandmarker, DrawingUtils, type PoseLandmarkerResul
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    style: 'position: relative; display: block;'
+    style: 'position: relative; display: block; width:100%; height:100%;'
   },
   template: `
-    <video #videoEl class="w-full h-auto " playsinline></video>
-    <canvas #canvasEl style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>
+    <video #videoEl playsinline></video>
+    <canvas #canvasEl></canvas>
   `,
-  styles: ``
+  styles: `
+    :host { display:block; }
+    video, canvas { width:100%; height:100%; object-fit:cover; display:block; }
+    canvas { position:absolute; top:0; left:0; pointer-events:none; }
+  `
 })
 export class MonitorCamComponent {
   // Emit pose detection results to parent components
