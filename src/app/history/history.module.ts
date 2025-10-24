@@ -19,9 +19,7 @@ const routes: Routes = [
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
-    HistoryPageComponent,
     SessionCardComponent,
-    SessionPageComponent,
     MetricsCardsComponent
   ]
 })
