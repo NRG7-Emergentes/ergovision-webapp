@@ -1,0 +1,9 @@
+.calibration-screen{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 32px;
+  gap: 32px;
+}
