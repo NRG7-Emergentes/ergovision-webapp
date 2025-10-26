@@ -4,6 +4,7 @@ import {ZardSliderComponent} from '@shared/components/slider/slider.component';
 import {ZardSelectComponent} from '@shared/components/select/select.component';
 import {ZardSelectItemComponent} from '@shared/components/select/select-item.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-settings-page',
@@ -19,4 +20,10 @@ import {ZardButtonComponent} from '@shared/components/button/button.component';
 })
 export class SettingsPageComponent {
 
+  constructor(private router: Router) {
+  }
+
+  redirectToCalibration() {
+    this.router.navigate(['/calibration']);
+  }
 }
