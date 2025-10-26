@@ -4,64 +4,90 @@
   </div>
   <div class="content">
     <div class="left">
-      <div style="width: 100%;">
+      <div style="width: 90%;">
         <div>
           <p style="font-weight: bold; font-size: 20px;">Posture</p>
           <div class="settings-options-container">
-            <div>
+            <div class="option">
               <p>
                 Posture Sensitivity
               </p>
-              <z-switch zSize="lg" zType="settings">Large</z-switch>
+              <div style="width: 200px">
+                <z-select zPlaceholder="Pick a sensitivity" [class]="'w-[100%]'">
+                  <z-select-item zValue="apple">low</z-select-item>
+                  <z-select-item zValue="banana">mid</z-select-item>
+                  <z-select-item zValue="blueberry">high</z-select-item>
+                </z-select>
+              </div>
             </div>
-            <div>
-              <p>
-                Show Skeleton
-              </p>
-              <z-switch zSize="lg" zType="settings">Large</z-switch>
-            </div>
-            <div>
+            <div class="option">
               <p>
                 Sampling Frequency
               </p>
-              <z-switch zSize="lg" zType="settings">Large</z-switch>
+              <div style="width: 200px">
+                <z-select zPlaceholder="Pick a frequency" [class]="'w-[100%]'">
+                  <z-select-item zValue="apple">20 fps</z-select-item>
+                  <z-select-item zValue="banana">40 fps</z-select-item>
+                  <z-select-item zValue="blueberry">60 fps</z-select-item>
+                </z-select>
+              </div>
+            </div>
+            <div class="option">
+              <p>
+                Show Skeleton
+              </p>
+              <z-switch zSize="lg" zType="settings"></z-switch>
             </div>
           </div>
         </div>
-        <div style="border: 1px solid #ccc; margin: 10px 0; width: 90%;"></div>
-        <div>
+        <div style="border: 1px solid #ccc; margin: 10px 0; width: 100%;"></div>
+        <div style="padding: 16px 0;">
           <p style="font-weight: bold; font-size: 20px;">Alerts</p>
           <div class="settings-options-container">
-            <div>
+            <div class="option">
               <p>
                 Visual alerts
               </p>
+              <z-switch zSize="lg" zType="settings"></z-switch>
             </div>
-            <div>
+            <div class="option">
               <p>
                 Sound alerts
               </p>
+              <z-switch zSize="lg" zType="settings"></z-switch>
             </div>
-            <div>
+          </div>
+          <div>
+            <div style="padding-bottom: 16px;">
               <p>
                 Alert Volume
               </p>
+              <div style="height: 10px;"></div>
+              <z-slider [class]="'w-[100%]'" zDefault="50" />
             </div>
-            <div>
+            <div class="option">
               <p>
                 Alert Interval
               </p>
+              <div style="width: 300px">
+                <z-select zPlaceholder="Pick an alert interval" [class]="'w-[100%]'">
+                  <z-select-item zValue="apple">5 min</z-select-item>
+                  <z-select-item zValue="banana">10 min</z-select-item>
+                  <z-select-item zValue="blueberry">15 min</z-select-item>
+                </z-select>
+              </div>
             </div>
           </div>
         </div>
-        <div style="border: 1px solid #ccc; margin: 10px 0; width: 90%;"></div>
-        <div>
+        <div style="border: 1px solid #ccc; margin: 10px 0; width: 100%;"></div>
+        <div style="padding: 16px 0;">
           <p style="font-weight: bold; font-size: 20px;">Notifications</p>
           <div class="settings-options-container">
-            <div>
+            <div class="option">
               <p>
                 Mail Notifications
               </p>
+              <z-switch zSize="lg" zType="settings"></z-switch>
             </div>
           </div>
         </div>
@@ -87,9 +113,9 @@
           </p>
         </div>
       </div>
-      <button>
-        <p>Calibrate</p>
-      </button>
+      <z-button class="bg-[#2B7FFF] text-white hover:bg-[#2B7FFF]/90" z-button zSize="lg">
+        Calibrate
+      </z-button>
     </div>
   </div>
 
