@@ -27,14 +27,14 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
           </div>
 
           <div class="stats-box">
-            <div class="info-card bg-muted text-foreground">Good posture Time: <strong>{{ goodTime }}</strong></div>
-            <div class="info-card bg-muted text-foreground">Active break duration: <strong>{{ totalTime }}</strong></div>
+            <div class="info-card bg-card text-card-foreground border border-border">Good posture Time: <strong>{{ goodTime }}</strong></div>
+            <div class="info-card bg-card text-card-foreground border border-border">Active break duration: <strong>{{ totalTime }}</strong></div>
           </div>
   </main>
 
   <aside class="sidebar">
           <div class="settings card bg-card text-card-foreground border border-border">
-            <h4 class="text-foreground">Monitoring Settings</h4>
+            <h4>Monitoring Settings</h4>
             
             <div class="setting-row">
               <span class="setting-label">Visual alert</span>
@@ -54,12 +54,12 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
 
             <div class="setting-row">
               <span class="setting-label">Inference speed</span>
-              <select [(ngModel)]="inferenceSpeed" class="inference-select">
-                <option value="1">1/1 frames (every frame)</option>
-                <option value="5">1/5 frames</option>
-                <option value="10">1/10 frames</option>
-                <option value="20">1/20 frames</option>
-                <option value="30">1/30 frames</option>
+              <select [(ngModel)]="inferenceSpeed" class="inference-select bg-muted text-card-foreground border border-border" style="background-color: var(--muted) !important; color: var(--card-foreground) !important;">
+                <option value="1" class="bg-card text-card-foreground" style="background-color: var(--card) !important; color: var(--card-foreground) !important;">1/1 frames (every frame)</option>
+                <option value="5" class="bg-card text-card-foreground" style="background-color: var(--card) !important; color: var(--card-foreground) !important;">1/5 frames</option>
+                <option value="10" class="bg-card text-card-foreground" style="background-color: var(--card) !important; color: var(--card-foreground) !important;">1/10 frames</option>
+                <option value="20" class="bg-card text-card-foreground" style="background-color: var(--card) !important; color: var(--card-foreground) !important;">1/20 frames</option>
+                <option value="30" class="bg-card text-card-foreground" style="background-color: var(--card) !important; color: var(--card-foreground) !important;">1/30 frames</option>
               </select>
             </div>
 
@@ -97,28 +97,28 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   .btn.success{background:#10b981;color:white}
   .btn.primary{background:#2563eb;color:white}
   .btn.destructive{background:var(--destructive);color:white}
-  .settings.card{padding:28px;border-radius:12px;font-size:18px;display:flex;flex-direction:column;width:100%;background:#ffffff}
-  .settings.card h4{font-size:20px;margin:0 0 20px;font-weight:600;color:#111827}
+  .settings.card{padding:28px;border-radius:12px;font-size:18px;display:flex;flex-direction:column;width:100%}
+  .settings.card h4{font-size:20px;margin:0 0 20px;font-weight:600;color:var(--card-foreground)}
   .setting-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-  .setting-label{font-size:16px;color:#374151}
+  .setting-label{font-size:16px;color:var(--card-foreground)}
   .switch{position:relative;display:block;width:48px;height:26px;flex-shrink:0}
   .switch input{position:absolute;opacity:0;width:0;height:0}
-  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#d1d5db;border-radius:26px;transition:background-color 0.3s}
+  .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--muted);border-radius:26px;transition:background-color 0.3s}
   .slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background-color:white;border-radius:50%;transition:transform 0.3s}
-  input:checked + .slider{background-color:#3b82f6}
+  input:checked + .slider{background-color:var(--primary)}
   input:checked + .slider:before{transform:translateX(22px)}
-  .time-info{margin:20px 0;padding:16px 0;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb}
+  .time-info{margin:20px 0;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
   .time-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:15px}
   .time-row:last-child{margin-bottom:0}
-  .time-row span{color:#6b7280}
-  .time-row strong{color:#111827;font-weight:600}
-  .inference-select{width:auto;min-width:180px;padding:6px 32px 6px 12px;font-size:14px;color:#374151;background-color:#f9fafb;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
-  .inference-select:hover{background-color:#f3f4f6;border-color:#9ca3af}
-  .inference-select:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
+  .time-row span{color:var(--card-foreground)}
+  .time-row strong{font-weight:600;color:var(--card-foreground)}
+  .inference-select{width:auto;min-width:180px;padding:6px 32px 6px 12px;font-size:14px;border-radius:6px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-color:var(--muted)!important;color:var(--card-foreground)!important}
+  .inference-select option{background-color:var(--card)!important;color:var(--card-foreground)!important;padding:8px!important}
+  .inference-select:hover,.inference-select:focus,.inference-select:active{background-color:var(--muted)!important;color:var(--card-foreground)!important}
   .start-area{display:flex;flex-direction:column;gap:12px;margin-top:20px}
   .start-area .btn{width:100%;padding:14px 20px;font-size:16px;border-radius:8px;font-weight:600}
-  .info-card{font-size:18px;padding:18px;border-radius:10px;background:#f3f4f6;text-align:center;color:#111827}
-  .info-card strong{color:#111827}
+  .info-card{font-size:18px;padding:18px;border-radius:10px;text-align:center}
+  .info-card strong{color:var(--card-foreground)}
   .stats-box{display:flex;gap:20px;margin-top:18px}
   `]
 })

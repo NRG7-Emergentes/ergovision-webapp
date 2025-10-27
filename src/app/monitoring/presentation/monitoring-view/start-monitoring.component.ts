@@ -25,8 +25,8 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
           </div>
 
           <div class="info-row">
-            <div class="info-card bg-muted text-foreground">Good posture Time: <strong>{{ goodTime }}</strong></div>
-            <div class="info-card bg-muted text-foreground">Active break duration: <strong>{{ pauseTime }}</strong></div>
+            <div class="info-card bg-card text-card-foreground border border-border">Good posture Time: <strong>{{ goodTime }}</strong></div>
+            <div class="info-card bg-card text-card-foreground border border-border">Active break duration: <strong>{{ pauseTime }}</strong></div>
           </div>
   </main>
 
@@ -58,8 +58,8 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   .controls .btn{margin-left:12px;padding:18px 32px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:18px}
   .btn.success{background:#10b981;color:white}
   .btn.primary{background:#2563eb;color:white}
-  .info-card{font-size:18px;padding:18px;border-radius:10px;background:#f3f4f6;text-align:center;color:#111827}
-  .info-card strong{color:#111827}
+  .info-card{font-size:18px;padding:18px;border-radius:10px;text-align:center}
+  .info-card strong{color:var(--card-foreground)}
   .info-row{display:flex;gap:20px;margin-top:18px}
   .recommendations.card{border-radius:12px;font-size:18px;width:100%;padding:24px;background:#f3f4f6}
   .recommendations.card h2{font-size:20px;margin:0 0 16px;font-weight:600;color:#111827}
