@@ -158,7 +158,7 @@ export class MonitorCamComponent {
     const poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
       baseOptions: {
         modelAssetPath:
-          'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
+          'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task',
         delegate: 'GPU'
       },
       runningMode: 'VIDEO'
@@ -203,7 +203,7 @@ export class MonitorCamComponent {
         }
 
         // Detect bad posture when distances are < 0.3
-        const isBadPosture = (d0_11_norm !== null && d0_11_norm < 0.3) || (d0_12_norm !== null && d0_12_norm < 0.3);
+        const isBadPosture = (d0_11_norm !== null && d0_11_norm < 0.23) || (d0_12_norm !== null && d0_12_norm < 0.23);
         const postureStatus = isBadPosture ? '⚠️ MALA POSTURA' : '✅ Postura OK';
 
         console.log(
