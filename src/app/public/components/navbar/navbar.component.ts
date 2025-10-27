@@ -28,7 +28,7 @@ import {Router} from '@angular/router';
                 Dashboard
               </button>
 
-              <button z-button zType="ghost" class="text-muted-foreground" >
+              <button z-button zType="ghost" class="text-muted-foreground" (click)="goToStartMonitoring()" >
                 Monitoring
               </button>
 
@@ -57,6 +57,9 @@ export class NavbarComponent {
 
   goToProgress() {
     this.router.navigate(['/progress/2d2631b8-0991-4934-a5a9-81c085d7f208']);
+  }
+  goToStartMonitoring(){
+    this.router.navigate(['/monitoring/start']);
   }
 
 
