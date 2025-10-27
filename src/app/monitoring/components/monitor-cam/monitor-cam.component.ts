@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ElementRef, output, viewChild, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, output, viewChild, signal, input } from '@angular/core';
 import { FilesetResolver, PoseLandmarker, DrawingUtils, type PoseLandmarkerResult } from '@mediapipe/tasks-vision';
 
 @Component({
@@ -24,6 +24,9 @@ import { FilesetResolver, PoseLandmarker, DrawingUtils, type PoseLandmarkerResul
   `
 })
 export class MonitorCamComponent {
+  // Input: detection interval (run detection every N frames)
+  readonly detectionInterval = input<number>(10);
+  
   // Emit pose detection results to parent components
   readonly postureResults = output<PoseLandmarkerResult | null>();
 
@@ -104,36 +107,49 @@ export class MonitorCamComponent {
     this.detectionIntervalId = window.setInterval(() => {
       if (!this.poseLandmarker || !this.canvasCtx || !this.drawingUtils) return;
 
-  const results = this.poseLandmarker.detectForVideo(video, performance.now());
-  // Store latest results for on-demand inspection
-  this.latestResults = results;
-
-      // increment frame counter and determine whether to log this frame
+      // increment frame counter and check if we should run detection this frame
       this._frameCounter = (this._frameCounter + 1) | 0;
-      const shouldLog = (this._frameCounter % this._logFrameInterval) === 0;
+      const shouldDetect = (this._frameCounter % this.detectionInterval()) === 0;
 
-      // Resize canvas to match video
+      // Always resize canvas to match video
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
-      // Draw results
+      // Clear canvas
       this.canvasCtx!.save();
       this.canvasCtx!.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (results.landmarks) {
-        for (const landmark of results.landmarks) {
-          this.drawingUtils.drawLandmarks(landmark, {
-            radius: (data) => DrawingUtils.lerp(data!.from!.z, -0.15, 0.1, 5, 1)
-          });
-          this.drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
+      // Run detection only every N frames based on detectionInterval
+      if (shouldDetect) {
+        const results = this.poseLandmarker.detectForVideo(video, performance.now());
+        // Store latest results for on-demand inspection
+        this.latestResults = results;
+
+        if (results.landmarks) {
+          for (const landmark of results.landmarks) {
+            this.drawingUtils.drawLandmarks(landmark, {
+              radius: (data) => DrawingUtils.lerp(data!.from!.z, -0.15, 0.1, 5, 1)
+            });
+            this.drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
+          }
+          // NOTE: automatic logging removed — use the on-screen button to print distances on demand
         }
-        // NOTE: automatic logging removed — use the on-screen button to print distances on demand
+
+        // Emit results to parent
+        this.postureResults.emit(results);
+      } else {
+        // Draw last known results when not detecting
+        if (this.latestResults && this.latestResults.landmarks) {
+          for (const landmark of this.latestResults.landmarks) {
+            this.drawingUtils.drawLandmarks(landmark, {
+              radius: (data) => DrawingUtils.lerp(data!.from!.z, -0.15, 0.1, 5, 1)
+            });
+            this.drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
+          }
+        }
       }
 
       this.canvasCtx!.restore();
-
-      // Emit results to parent
-      this.postureResults.emit(results);
     }, 1000 / 30);
   }
 
