@@ -1,29 +1,32 @@
 import { Component, ChangeDetectionStrategy, OnInit, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { HistoryService, SessionSummary } from '../../services/history.service';
-import { SessionCardComponent } from '../../components/session-card/session-card.component';
-import {NgForOf, NgIf} from '@angular/common';
+import {SessionCardComponent} from '@app/history/components/session-card/session-card.component';
+import {HistoryService, SessionSummary} from '@app/history/services/history.service';
+
 
 @Component({
   selector: 'app-history-page',
   standalone: true,
-  imports: [SessionCardComponent, NgForOf, NgIf],
+  imports: [SessionCardComponent, ],
   template: `
-    <div class="max-w-4xl mx-auto py-8 px-4">
-      <header class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">History</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">List of monitored sessions — click Detail to view metrics.</p>
-      </header>
-
-      <div *ngIf="sessions().length === 0" class="text-sm text-gray-500">No sessions found.</div>
-
-      <div class="space-y-3">
-        <app-session-card
-          *ngFor="let s of sessions()"
-          [session]="s"
-          (detailClick)="goDetail($event)"
-        ></app-session-card>
+    <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div class="mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">History</h1>
+        <p class="text-muted-foreground mt-2">List of monitored sessions, click Detail to view metrics.</p>
       </div>
+
+      @if (sessions().length > 0) {
+        <div class="flex flex-col gap-4">
+          @for (session of sessions(); track session.id) {
+            <app-session-card [session]="session" (detailClick)="goDetail($event)"/>
+          }
+        </div>
+
+      } @else {
+        <div class="text-sm "> No sessions found. </div>
+      }
+
+
     </div>
   `,
   styles: [``],
