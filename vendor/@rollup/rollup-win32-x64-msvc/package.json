@@ -1,0 +1,7 @@
+{
+  "name": "@rollup/rollup-win32-x64-msvc",
+  "version": "0.0.0-stub",
+  "description": "Stub package to satisfy optional native module resolution on Windows during development",
+  "main": "index.js",
+  "license": "MIT"
+}
