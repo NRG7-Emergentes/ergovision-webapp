@@ -20,6 +20,7 @@ export type ColumnChartOptions = {
 
 
 
+
 @Component({
   selector: 'app-progress-chart',
   imports: [
