@@ -132,7 +132,8 @@ export class MonitorCamComponent {
             });
             this.drawingUtils.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
           }
-          // NOTE: automatic logging removed — use the on-screen button to print distances on demand
+          // Automatic posture detection logging
+          this.detectAndLogPosture(results);
         }
 
         // Emit results to parent
@@ -219,7 +220,7 @@ export class MonitorCamComponent {
         }
 
         // Detect bad posture when distances are < 0.3
-        const isBadPosture = (d0_11_norm !== null && d0_11_norm < 0.23) || (d0_12_norm !== null && d0_12_norm < 0.23);
+        const isBadPosture = (d0_11_norm !== null && d0_11_norm < 0.3) || (d0_12_norm !== null && d0_12_norm < 0.3);
         const postureStatus = isBadPosture ? '⚠️ MALA POSTURA' : '✅ Postura OK';
 
         console.log(
@@ -233,4 +234,40 @@ export class MonitorCamComponent {
       console.warn('[MonitorCam] Error computing distances on demand', err);
     }
   };
+
+  // Automatic posture detection (runs during detection loop)
+  private detectAndLogPosture(results: PoseLandmarkerResult): void {
+    if (!results || !results.landmarks) return;
+
+    try {
+      results.landmarks.forEach((lmArr, personIdx) => {
+        const p0 = lmArr[0];
+        const p11 = lmArr[11];
+        const p12 = lmArr[12];
+
+        let d0_11_norm: number | null = null;
+        let d0_12_norm: number | null = null;
+
+        if (p0 && p11) {
+          const dx = p0.x - p11.x;
+          const dy = p0.y - p11.y;
+          d0_11_norm = Math.hypot(dx, dy);
+        }
+
+        if (p0 && p12) {
+          const dx = p0.x - p12.x;
+          const dy = p0.y - p12.y;
+          d0_12_norm = Math.hypot(dx, dy);
+        }
+
+        // Detect bad posture when distances are < 0.3
+        const isBadPosture = (d0_11_norm !== null && d0_11_norm < 0.3) || (d0_12_norm !== null && d0_12_norm < 0.3);
+        const postureStatus = isBadPosture ? '⚠️ MALA POSTURA' : '✅ Postura OK';
+
+        console.log(`[MonitorCam] (auto) person=${personIdx} ${postureStatus}`);
+      });
+    } catch (err) {
+      console.warn('[MonitorCam] Error in automatic posture detection', err);
+    }
+  }
 }

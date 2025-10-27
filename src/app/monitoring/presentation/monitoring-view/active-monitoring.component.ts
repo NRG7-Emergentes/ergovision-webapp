@@ -119,6 +119,7 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   .start-area .btn{width:100%;padding:14px 20px;font-size:16px;border-radius:8px;font-weight:600}
   .info-card{font-size:18px;padding:18px;border-radius:10px;background:#f3f4f6;text-align:center;color:#111827}
   .info-card strong{color:#111827}
+  .stats-box{display:flex;gap:20px;margin-top:18px}
   `]
 })
 export class ActiveMonitoringComponent {
