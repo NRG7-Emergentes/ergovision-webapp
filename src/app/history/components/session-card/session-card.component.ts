@@ -9,9 +9,9 @@ import {ZardButtonComponent} from '@shared/components/button/button.component';
     <div class="bg-card border p-6 rounded-lg shadow-sm text-card-foreground w-full flex items-center justify-between">
       <div class="flex items-center gap-16">
         <span class="text-xl font-bold">Session ID: {{ session.id }}</span>
-        <span class="text-xl text-muted-foreground"> {{session.date}} </span>
+        <span class="text-xl text-muted-foreground"> Date: {{session.date}} </span>
         <div class="rounded-full bg-muted text-muted-foreground px-4 py-2 ">
-          <span class="text-md"> {{session.duration}}</span>
+          <span class="text-md"> Duration: {{session.duration}}</span>
         </div>
       </div>
       <button z-button zType="default" zSize="lg" (click)="onDetail()">

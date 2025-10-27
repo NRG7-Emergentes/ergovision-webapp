@@ -1,47 +1,77 @@
 import { Component, ChangeDetectionStrategy, OnInit, signal, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { HistoryService, SessionDetail } from '../../services/history.service';
-import {MetricsCardsComponent} from '@app/history/components/metrics-cards/metrics-cards.component';
+import {ZardProgressBarComponent} from '@shared/components/progress-bar/progress-bar.component';
+import {HistoryService, SessionDetail} from '@app/history/services/history.service';
 
 @Component({
   selector: 'app-session-page',
   template: `
-    <div class="max-w-4xl mx-auto py-8 px-4">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Session {{ id }}</h2>
-        <div class="text-sm text-gray-500 dark:text-gray-400">Overview</div>
+    <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+      <div class="mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">Session ID: {{ id }}</h1>
+        <p class="text-muted-foreground mt-2">Overview of the monitoring session</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div class="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md flex flex-col">
-          <div class="flex items-center gap-3 mb-2">
-            <div class="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-700 dark:text-blue-100 font-semibold">D</div>
-            <div>
-              <div class="text-xs text-gray-500">Date</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ (session() || mock).date }}</div>
-            </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2  gap-4 ">
+        <div class="bg-card border p-6 rounded-lg shadow-sm text-card-foreground w-full flex items-center justify-between">
+          <span class="text-md font-medium tracking-widest text-muted-foreground text-xl"> Date (local timezone) </span>
+          <div class="bg-background border rounded-full px-4 py-2 ">
+            <span class="font-bold text-2xl"> 2025-10-20 </span>
           </div>
-          <div class="text-xs text-gray-500">Recorded at local timezone</div>
         </div>
-
-        <div class="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md flex flex-col">
-          <div class="flex items-center gap-3 mb-2">
-            <div class="w-8 h-8 rounded bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-700 dark:text-green-100 font-semibold">T</div>
+        <div class="bg-card border p-6 rounded-lg shadow-sm text-card-foreground w-full flex items-center justify-between">
+          <span class="text-md font-medium tracking-widest text-muted-foreground text-xl"> Session Time </span>
+          <div class="bg-background border rounded-full px-4 py-2 ">
+            <span class="font-bold text-2xl"> 01:30:00 </span>
+          </div>
+        </div>
+        <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
+          <p class="text-xl font-bold mb-4"> Posture</p>
+          <div class="flex flex-col gap-4">
             <div>
-              <div class="text-xs text-gray-500">Duration</div>
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ (session() || mock).duration }}</div>
+              <div class="mb-2 flex justify-between items-center">
+                <span class="text-md font-medium tracking-widest"> Good Posture </span>
+                <span> 80% </span>
+              </div>
+              <z-progress-bar [progress]="80"  zType="constructive"></z-progress-bar>
+              <div class="mt-2">
+                <span class="text-muted-foreground text-sm"> Time in Good Posture: 01:12:00</span>
+              </div>
+            </div>
+            <div>
+              <div class="mb-2 flex justify-between items-center">
+                <span class="text-md font-medium tracking-widest"> Bad Posture </span>
+                <span> 20% </span>
+              </div>
+              <z-progress-bar [progress]="20"  zType="destructive"></z-progress-bar>
+              <div class="mt-2">
+                <span class="text-muted-foreground text-sm"> Time in Bad Posture: 00:18:00</span>
+              </div>
             </div>
           </div>
-          <div class="text-xs text-gray-500">HH:MM:SS</div>
+
+        </div>
+        <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
+          <p class="text-xl font-bold mb-4"> Pauses</p>
+          <div class="flex flex-col gap-4  mb-2 ">
+            <div class="p-4 bg-secondary rounded-lg flex items-center justify-between">
+              <span class="font-medium tracking-widest">Number of Pauses:</span>
+              <span class="text-muted-foreground tracking-widest">3 Pauses</span>
+            </div>
+            <div class="p-4 bg-secondary rounded-lg flex items-center justify-between">
+              <span class="font-medium tracking-widest">Average Pause Time:</span>
+              <span class="text-muted-foreground tracking-widest">00:03:30</span>
+            </div>
+          </div>
+          <span class="text-muted-foreground text-sm"> Note: pauses are detected when inactivity > threshold. </span>
         </div>
       </div>
-
-      <app-metrics-cards [detail]="session()"></app-metrics-cards>
     </div>
   `,
   styles: [``],
   imports: [
-    MetricsCardsComponent
+    ZardProgressBarComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
