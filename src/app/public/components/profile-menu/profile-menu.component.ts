@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import {ZardDropdownModule} from '@shared/components/dropdown/dropdown.module';
 import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-profile-menu',
@@ -13,10 +14,13 @@ import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
       </div>
       <z-dropdown-menu-content #menu="zDropdownMenuContent" class="w-56">
         <z-dropdown-menu-label>My Account</z-dropdown-menu-label>
-        <z-dropdown-menu-item >
+
+        <z-dropdown-menu-item (click)="goToProfile()">
           <i class="icon-circle-user ml-1"></i>
           Profile
         </z-dropdown-menu-item>
+
+
         <z-dropdown-menu-item >
           <i class="icon-settings ml-1"></i>
           Settings
@@ -35,5 +39,10 @@ import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
   styles: ``
 })
 export class ProfileMenuComponent {
+  constructor(private router: Router) {
+  }
 
+  goToProfile(): void {
+    void this.router.navigate(['/profile']);
+  }
 }
