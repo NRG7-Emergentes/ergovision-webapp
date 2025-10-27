@@ -14,16 +14,14 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
       <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div class="content">
         <main class="main-col">
-          <div class="video-card">
-            <div class="video-wrap">
-              <app-monitor-cam class="monitor-video"></app-monitor-cam>
-            </div>
-            <div class="card-bottom">
-              <div class="note">Live preview</div>
-              <div class="controls">
-                <button z-button (click)="onCalibrate()" class="btn ghost">Calibrate</button>
-                <button z-button (click)="onStart()" class="btn primary">Start</button>
-              </div>
+          <div class="monse-cam-wrap">
+            <app-monitor-cam class="monitor-video"></app-monitor-cam>
+          </div>
+          <div class="card-bottom">
+            <div class="note">Live preview</div>
+            <div class="controls">
+              <button z-button (click)="onCalibrate()" class="btn ghost">Calibrate</button>
+              <button z-button (click)="onStart()" class="btn primary">Start</button>
             </div>
           </div>
 
@@ -54,16 +52,11 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   /* make sidebar wider so recommendations occupy more horizontal space */
   /* make sidebar even wider so recommendations occupy more horizontal space */
   .sidebar{width:480px;flex:0 0 480px;display:flex;flex-direction:column}
-    /* let the video area size match the natural camera component (same as Monse) */
-  /* make camera area match Monse: fixed height and controls below the camera */
-  .video-card{background:#ffffff;border-radius:10px;box-shadow:0 8px 24px rgba(2,6,23,0.12);overflow:hidden;display:flex;flex-direction:column}
-  .video-wrap{width:100%;overflow:hidden;height:720px}
-  /* place controls below the camera (normal flow) */
-  .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6;background:transparent}
-  .note{color:#6b7280;font-size:13px}
-  .monitor-video{width:100%;height:100%;object-fit:cover;display:block}
-  /* make the camera wider by allowing the main column to be wider */
-  .video-card{margin-left:20px}
+    /* use the same minimal camera wrapper as Monse: place app-monitor-cam directly */
+    .monse-cam-wrap{width:100%;}
+    .monitor-video{width:100%;height:auto;object-fit:cover;display:block}
+    .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6;background:transparent}
+    .note{color:#6b7280;font-size:13px}
   /* larger buttons */
   .controls .btn{margin-left:12px;padding:20px 28px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:22px}
   .card-bottom .btn.ghost{padding:18px 24px}

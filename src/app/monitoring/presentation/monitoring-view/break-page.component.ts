@@ -40,7 +40,7 @@ function msToHms(ms: number) {
   .break-wrap{padding:12px;display:flex;justify-content:center;min-height:calc(100vh - 88px)}
   .break-panel{width:1400px;max-width:95vw;background:var(--card);padding:36px;border-radius:12px;max-height:calc(100vh - 120px);overflow:auto}
   .summary{display:flex;gap:22px}
-  .box{flex:1;background:#e9ecef;padding:28px;border-radius:12px;text-align:center;font-size:18px;max-height:50vh;overflow:auto}
+  .box{flex:1;background:white;padding:28px;border-radius:12px;text-align:center;font-size:18px;max-height:50vh;overflow:auto}
   .exercises{display:flex;gap:20px;margin-top:26px}
   .exercise img{width:340px;height:190px;object-fit:cover;border-radius:12px}
   .actions{margin-top:26px;text-align:center}

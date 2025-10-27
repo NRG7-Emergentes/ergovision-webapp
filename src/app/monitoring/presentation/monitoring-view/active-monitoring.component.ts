@@ -15,16 +15,14 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
       <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div class="content">
         <main class="main-col">
-          <div class="video-card">
-            <div class="video-wrap">
-              <app-monitor-cam class="monitor-video"></app-monitor-cam>
-            </div>
-            <div class="card-bottom">
-              <div class="note">Live monitoring</div>
-              <div class="controls">
-                <button z-button (click)="onPause()" class="btn ghost">Pause</button>
-                <button z-button (click)="onEnd()" class="btn destructive">End</button>
-              </div>
+          <div class="monse-cam-wrap">
+            <app-monitor-cam class="monitor-video"></app-monitor-cam>
+          </div>
+          <div class="card-bottom">
+            <div class="note">Live monitoring</div>
+            <div class="controls">
+              <button z-button (click)="onPause()" class="btn ghost">Pause</button>
+              <button z-button (click)="onEnd()" class="btn destructive">End</button>
             </div>
           </div>
 
@@ -58,11 +56,10 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   /* widen the sidebar so settings take more horizontal space and avoid vertical scroll */
   /* widen the sidebar so settings take more horizontal space and avoid vertical scroll */
   .sidebar{width:480px;flex:0 0 480px;display:flex;flex-direction:column}
-  .video-card{background:#ffffff;border-radius:10px;box-shadow:0 8px 24px rgba(2,6,23,0.12);overflow:hidden;display:flex;flex-direction:column}
-  .video-wrap{width:100%;overflow:hidden;height:720px}
-  .monitor-video{width:100%;height:100%;object-fit:cover;display:block}
+  /* use the same minimal camera wrapper as Monse: place app-monitor-cam directly */
+  .monse-cam-wrap{width:100%;}
+  .monitor-video{width:100%;height:auto;object-fit:cover;display:block}
   .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6;background:transparent}
-  .video-card{margin-left:20px}
     /* larger UI: buttons, settings */
   .controls .btn{margin-left:12px;padding:20px 28px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:22px}
   .start-area .btn{padding:16px 22px;font-size:18px}
