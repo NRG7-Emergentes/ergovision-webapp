@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MonitoringService } from '@app/monitoring/presentation/monitoring-view/monitoring.service';
 import { MonitorCamComponent } from '@app/monitoring/components/monitor-cam/monitor-cam.component';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
+import {toast} from 'ngx-sonner';
 
 @Component({
   selector: 'monitoring-start',
@@ -93,7 +94,7 @@ import { ZardButtonComponent } from '@shared/components/button/button.component'
 
       </div>
       <div class="flex gap-4 ">
-        <button z-button zType="outline" zSize="lg"> Calibrate </button>
+        <button z-button zType="outline" zSize="lg" (click)="showToast()"> Calibrate </button>
         <button z-button zSize="lg"> Start </button>
       </div>
     </div>
@@ -112,7 +113,6 @@ export class StartMonitoringComponent {
 
   async checkCameraAvailability(): Promise<void> {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      console.log('Camera API is not supported by this browser.');
       return;
     }
 
@@ -120,12 +120,16 @@ export class StartMonitoringComponent {
       // We request video access and immediately stop the tracks.
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       stream.getTracks().forEach(track => track.stop());
-      console.log('Camera is available.');
       this.available = true;
     } catch (err) {
-      console.error('Camera is not available or permission was denied.', err);
       this.available = false;
     }
+  }
+
+  showToast() {
+    toast.success('Notificacion', {
+      description: 'Esto es una noti xddd',
+    });
   }
 
 }
