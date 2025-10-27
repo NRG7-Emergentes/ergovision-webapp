@@ -18,7 +18,8 @@ function msToHms(ms: number) {
   imports: [ZardButtonComponent],
   template: `
     <div class="break-wrap">
-      <div class="break-panel">
+      <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="break-panel">
         <div class="summary">
           <div class="box">Break Time<br/><strong>{{ msToHms(stats.pauseMs) }}</strong></div>
           <div class="box">You took {{ stats.pauseCount }} breaks today</div>
@@ -31,6 +32,7 @@ function msToHms(ms: number) {
         <div class="actions">
           <button z-button (click)="onBack()" class="btn primary">Go back to work</button>
         </div>
+        </div>
       </div>
     </div>
   `,
@@ -42,7 +44,7 @@ function msToHms(ms: number) {
   .exercises{display:flex;gap:20px;margin-top:26px}
   .exercise img{width:340px;height:190px;object-fit:cover;border-radius:12px}
   .actions{margin-top:26px;text-align:center}
-  .btn.primary{background:var(--primary);color:white;padding:20px 26px;font-size:20px;border-radius:12px}
+  .btn.primary{background:white;color:white;padding:20px 26px;font-size:20px;border-radius:12px}
   `]
 })
 export class BreakPageComponent {

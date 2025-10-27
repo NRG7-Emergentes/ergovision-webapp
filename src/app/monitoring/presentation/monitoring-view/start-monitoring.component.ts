@@ -11,7 +11,8 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   template: `
     <div class="monitoring-page">
 
-      <div class="content">
+      <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="content">
         <main class="main-col">
           <div class="video-card">
             <div class="video-wrap">
@@ -30,14 +31,15 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
             <div class="info-card">Good posture Time: <strong>{{ goodTime }}</strong></div>
             <div class="info-card">Active break duration: <strong>{{ pauseTime }}</strong></div>
           </div>
-        </main>
+  </main>
 
-        <aside class="sidebar">
+  <aside class="sidebar">
           <div class="recommendations card">
-            <h4>Recommendations</h4>
-            <p>Remember to not turn off the camera while monitoring is active</p>
+            <h2>Recommendations</h2>
+            <h4>Remember to not turn off the camera while monitoring is active</h4>
           </div>
-        </aside>
+  </aside>
+        </div>
       </div>
     </div>
   `,
@@ -50,26 +52,34 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   .content{display:flex;gap:20px;padding:12px 20px;align-items:flex-start;width:100%;max-width:100vw;min-height:calc(100vh - 88px)}
   .main-col{flex:1;max-width:2200px;margin-left:20px;display:flex;flex-direction:column}
   /* make sidebar wider so recommendations occupy more horizontal space */
-  .sidebar{width:420px;flex:0 0 420px;display:flex;flex-direction:column}
-      /* ensure video area matches monitor height used across pages */
-      .video-wrap{height:var(--monitor-video-height);width:100%;overflow:hidden}
-      .monitor-video{width:100%;height:100%;object-fit:cover;display:block}
-  .video-card{background:#ffffff;border-radius:10px;box-shadow:0 8px 24px rgba(2,6,23,0.12);overflow:hidden;display:flex;flex-direction:column;min-height:var(--monitor-video-height);max-height:var(--monitor-video-height)}
-  .video-wrap{height:100%;width:100%;overflow:hidden;flex:1}
+  /* make sidebar even wider so recommendations occupy more horizontal space */
+  .sidebar{width:480px;flex:0 0 480px;display:flex;flex-direction:column}
+    /* let the video area size match the natural camera component (same as Monse) */
+  /* make camera area match Monse: fixed height and controls below the camera */
+  .video-card{background:#ffffff;border-radius:10px;box-shadow:0 8px 24px rgba(2,6,23,0.12);overflow:hidden;display:flex;flex-direction:column}
+  .video-wrap{width:100%;overflow:hidden;height:720px}
+  /* place controls below the camera (normal flow) */
+  .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6;background:transparent}
+  .note{color:#6b7280;font-size:13px}
   .monitor-video{width:100%;height:100%;object-fit:cover;display:block}
   /* make the camera wider by allowing the main column to be wider */
   .video-card{margin-left:20px}
   /* larger buttons */
-  .controls .btn{margin-left:12px;padding:18px 24px;border-radius:10px;border:0;cursor:pointer;font-weight:700;font-size:20px}
-  .card-bottom .btn.ghost{padding:16px 22px}
+  .controls .btn{margin-left:12px;padding:20px 28px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:22px}
+  .card-bottom .btn.ghost{padding:18px 24px}
   /* recommendations larger */
-  /* recommendations: wider and no scroll -- let content flow naturally */
-  .recommendations.card{background:#f8fafc;padding:24px;border-radius:12px;font-size:18px;display:flex;flex-direction:column;justify-content:center;overflow:visible;max-height:none;min-height:auto;width:100%}
-  .settings.card{padding:24px;border-radius:12px;font-size:18px;display:flex;flex-direction:column;justify-content:flex-start;overflow:visible;max-height:none;min-height:auto}
+  /* recommendations: wider and no scroll -- larger typography and spacing */
+  .recommendations.card{background:#ffffff;padding:32px 28px;border-radius:12px;font-size:22px;display:flex;flex-direction:column;justify-content:center;overflow:visible;max-height:none;min-height:auto;width:100%}
+  .recommendations.card h2{font-size:24px;margin:0 0 8px}
+  .recommendations.card h4{font-size:20px;margin:0}
+  .recommendations.card p{font-size:20px;line-height:1.4;margin:0}
+  /* make the info cards larger/readable */
+  .info-card{font-size:20px;padding:20px}
+  .settings.card{padding:28px;border-radius:12px;font-size:20px;display:flex;flex-direction:column;justify-content:flex-start;overflow:visible;max-height:none;min-height:auto;background:#ffffff}
   .monitoring-page, .content { box-sizing: border-box; }
       .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6}
       .note{color:#6b7280;font-size:13px}
-      .controls .btn{margin-left:10px;padding:10px 16px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+  .controls .btn{margin-left:10px;padding:10px 16px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
       .btn.primary{background:#2563eb;color:white}
       .btn.success{background:#10b981;color:white}
   .recommendations.card{background:#f8fafc;padding:18px;border-radius:10px}

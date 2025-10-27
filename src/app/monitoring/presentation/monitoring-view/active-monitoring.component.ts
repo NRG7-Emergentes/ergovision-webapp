@@ -12,7 +12,8 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   template: `
     <div class="monitoring-page">
 
-      <div class="content">
+      <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="content">
         <main class="main-col">
           <div class="video-card">
             <div class="video-wrap">
@@ -31,9 +32,9 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
             <div class="info-card">Good posture Time: <strong>{{ goodTime }}</strong></div>
             <div class="info-card">Active break duration: <strong>{{ totalTime }}</strong></div>
           </div>
-        </main>
+  </main>
 
-        <aside class="sidebar">
+  <aside class="sidebar">
           <div class="settings card">
             <h4>Monitoring Settings</h4>
             <div>Visual alert: <input type="checkbox" checked/></div>
@@ -43,7 +44,8 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
               <button z-button (click)="onEnd()" class="btn destructive">End Monitoring</button>
             </div>
           </div>
-        </aside>
+  </aside>
+  </div>
       </div>
     </div>
     
@@ -54,16 +56,22 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   .content{display:flex;gap:20px;padding:12px 20px;align-items:flex-start;width:100%;max-width:100vw;min-height:calc(100vh - 88px)}
   .main-col{flex:1;max-width:2200px;margin-left:20px;display:flex;flex-direction:column}
   /* widen the sidebar so settings take more horizontal space and avoid vertical scroll */
-  .sidebar{width:420px;flex:0 0 420px;display:flex;flex-direction:column}
-  .video-card{background:#ffffff;border-radius:10px;box-shadow:0 8px 24px rgba(2,6,23,0.12);overflow:hidden;display:flex;flex-direction:column;min-height:var(--monitor-video-height);max-height:var(--monitor-video-height)}
-  .video-wrap{height:100%;width:100%;overflow:hidden;flex:1}
+  /* widen the sidebar so settings take more horizontal space and avoid vertical scroll */
+  .sidebar{width:480px;flex:0 0 480px;display:flex;flex-direction:column}
+  .video-card{background:#ffffff;border-radius:10px;box-shadow:0 8px 24px rgba(2,6,23,0.12);overflow:hidden;display:flex;flex-direction:column}
+  .video-wrap{width:100%;overflow:hidden;height:720px}
   .monitor-video{width:100%;height:100%;object-fit:cover;display:block}
+  .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6;background:transparent}
   .video-card{margin-left:20px}
     /* larger UI: buttons, settings */
-  .controls .btn{margin-left:12px;padding:18px 24px;border-radius:10px;border:0;cursor:pointer;font-weight:700;font-size:20px}
+  .controls .btn{margin-left:12px;padding:20px 28px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:22px}
   .start-area .btn{padding:16px 22px;font-size:18px}
-  /* remove forced heights and scrolling inside the settings card so it can expand horizontally */
-  .settings.card{padding:24px;border-radius:12px;font-size:18px;display:flex;flex-direction:column;justify-content:flex-start;overflow:visible;max-height:none;min-height:auto;width:100%}
+  /* remove forced heights and scrolling inside the settings card so it can expand horizontally; increase typography */
+  .settings.card{padding:32px;border-radius:12px;font-size:22px;display:flex;flex-direction:column;justify-content:flex-start;overflow:visible;max-height:none;min-height:auto;width:100%;background:#ffffff}
+  .settings.card h4{font-size:24px;margin:0 0 8px}
+  .settings.card div{font-size:20px}
+  /* make stat/info cards larger */
+  .info-card{font-size:20px;padding:20px}
   .monitoring-page, .content { box-sizing: border-box; }
     .stats-box{display:flex;gap:20px;margin-top:18px}
     .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6}
