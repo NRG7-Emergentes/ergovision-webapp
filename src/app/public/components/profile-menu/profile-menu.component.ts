@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {ZardDropdownModule} from '@shared/components/dropdown/dropdown.module';
 import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile-menu',
@@ -21,7 +22,7 @@ import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
           <i class="icon-settings ml-1"></i>
           Settings
         </z-dropdown-menu-item>
-        <z-dropdown-menu-item >
+        <z-dropdown-menu-item (click)="goHistory()">
           <i class="icon-timer ml-1"></i>
           History
         </z-dropdown-menu-item>
@@ -35,5 +36,9 @@ import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
   styles: ``
 })
 export class ProfileMenuComponent {
+  private router = inject(Router);
 
+  goHistory() {
+    this.router.navigate(['history']);
+  }
 }
