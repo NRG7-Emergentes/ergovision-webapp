@@ -34,7 +34,14 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   <aside class="sidebar">
           <div class="recommendations card">
             <h2>Recommendations</h2>
-            <h4>Remember to not turn off the camera while monitoring is active</h4>
+            <ul class="rec-list">
+              <li>Keep your back straight and shoulders relaxed.</li>
+              <li>Adjust your chair height so your feet rest flat on the floor.</li>
+              <li>Position the screen at eye level to avoid neck strain.</li>
+              <li>Take short micro-breaks every 20–30 minutes to stretch.</li>
+              <li>Keep elbows close to your body and at a 90° angle when typing.</li>
+              <li>Ensure the camera shows your upper body and shoulders for accurate posture detection.</li>
+            </ul>
           </div>
   </aside>
         </div>
@@ -43,41 +50,31 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   `,
   styles: [`
   :host { --monitor-video-height: 60vh; display: block; font-family: Inter, Arial, sans-serif; color:#111827 }
-    .topbar{height:56px;background:#0f172a;color:#fff;display:flex;align-items:center;gap:16px;padding:0 16px}
-    .topbar .brand{font-weight:700}
-    .topbar .nav{opacity:0.85}
-  /* make content take almost whole viewport and allow larger video */
+  /* layout */
   .content{display:flex;gap:20px;padding:12px 20px;align-items:flex-start;width:100%;max-width:100vw;min-height:calc(100vh - 88px)}
   .main-col{flex:1;max-width:2200px;margin-left:20px;display:flex;flex-direction:column}
-  /* make sidebar wider so recommendations occupy more horizontal space */
-  /* make sidebar even wider so recommendations occupy more horizontal space */
   .sidebar{width:480px;flex:0 0 480px;display:flex;flex-direction:column}
-    /* use the same minimal camera wrapper as Monse: place app-monitor-cam directly */
-    .monse-cam-wrap{width:100%;}
-    .monitor-video{width:100%;height:auto;object-fit:cover;display:block}
-    .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6;background:transparent}
-    .note{color:#6b7280;font-size:13px}
-  /* larger buttons */
-  .controls .btn{margin-left:12px;padding:20px 28px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:22px}
-  .card-bottom .btn.ghost{padding:18px 24px}
-  /* recommendations larger */
-  /* recommendations: wider and no scroll -- larger typography and spacing */
-  .recommendations.card{background:#ffffff;padding:32px 28px;border-radius:12px;font-size:22px;display:flex;flex-direction:column;justify-content:center;overflow:visible;max-height:none;min-height:auto;width:100%}
-  .recommendations.card h2{font-size:24px;margin:0 0 8px}
-  .recommendations.card h4{font-size:20px;margin:0}
-  .recommendations.card p{font-size:20px;line-height:1.4;margin:0}
-  /* make the info cards larger/readable */
-  .info-card{font-size:20px;padding:20px}
-  .settings.card{padding:28px;border-radius:12px;font-size:20px;display:flex;flex-direction:column;justify-content:flex-start;overflow:visible;max-height:none;min-height:auto;background:#ffffff}
+  .monse-cam-wrap{width:100%;}
+  .monitor-video{width:100%;height:auto;object-fit:cover;display:block}
+  .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6;background:transparent}
+  .note{color:#6b7280;font-size:13px}
+
+  /* buttons - standardized */
+  .controls .btn{margin-left:12px;padding:18px 32px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:18px}
+  .card-bottom .btn.ghost{padding:14px 24px;font-weight:600}
+  .btn.primary{background:#2563eb;color:white}
+  .btn.success{background:#10b981;color:white}
+
+  /* recommendations card */
+  .recommendations.card{background:#ffffff;padding:28px;border-radius:12px;font-size:18px;display:flex;flex-direction:column;justify-content:flex-start;overflow:auto;flex:1;min-height:420px}
+  .recommendations.card h2{font-size:22px;margin:0 0 12px}
+  .recommendations.card .rec-list{margin:0;padding-left:20px;display:block;gap:12px}
+  .recommendations.card .rec-list li{margin-bottom:12px;font-size:16px;line-height:1.5}
+
+  /* info cards and settings */
+  .info-card{font-size:18px;padding:18px;border-radius:10px;background:#f3f4f6;text-align:center}
+  .settings.card{padding:20px;border-radius:12px;font-size:18px;display:flex;flex-direction:column;justify-content:flex-start;overflow:visible;max-height:none;min-height:auto;background:#ffffff}
   .monitoring-page, .content { box-sizing: border-box; }
-      .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6}
-      .note{color:#6b7280;font-size:13px}
-  .controls .btn{margin-left:10px;padding:10px 16px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
-      .btn.primary{background:#2563eb;color:white}
-      .btn.success{background:#10b981;color:white}
-  .recommendations.card{background:#f8fafc;padding:18px;border-radius:10px}
-      .info-row{display:flex;gap:14px;margin-top:14px}
-      .info-card{flex:1;background:#f3f4f6;padding:14px;border-radius:8px;text-align:center;font-weight:600}
   `]
 })
 export class StartMonitoringComponent {

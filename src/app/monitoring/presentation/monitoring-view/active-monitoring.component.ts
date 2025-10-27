@@ -50,37 +50,31 @@ import { ZardButtonComponent } from '../../../shared/components/button/button.co
   `,
   styles: [`
   :host { --monitor-video-height: 60vh; display:block }
-  /* layout tuned so camera is wider and taller */
+  /* layout */
   .content{display:flex;gap:20px;padding:12px 20px;align-items:flex-start;width:100%;max-width:100vw;min-height:calc(100vh - 88px)}
   .main-col{flex:1;max-width:2200px;margin-left:20px;display:flex;flex-direction:column}
-  /* widen the sidebar so settings take more horizontal space and avoid vertical scroll */
-  /* widen the sidebar so settings take more horizontal space and avoid vertical scroll */
   .sidebar{width:480px;flex:0 0 480px;display:flex;flex-direction:column}
-  /* use the same minimal camera wrapper as Monse: place app-monitor-cam directly */
   .monse-cam-wrap{width:100%;}
   .monitor-video{width:100%;height:auto;object-fit:cover;display:block}
   .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6;background:transparent}
-    /* larger UI: buttons, settings */
-  .controls .btn{margin-left:12px;padding:20px 28px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:22px}
-  .start-area .btn{padding:16px 22px;font-size:18px}
-  /* remove forced heights and scrolling inside the settings card so it can expand horizontally; increase typography */
-  .settings.card{padding:32px;border-radius:12px;font-size:22px;display:flex;flex-direction:column;justify-content:flex-start;overflow:visible;max-height:none;min-height:auto;width:100%;background:#ffffff}
-  .settings.card h4{font-size:24px;margin:0 0 8px}
-  .settings.card div{font-size:20px}
-  /* make stat/info cards larger */
-  .info-card{font-size:20px;padding:20px}
+
+  /* buttons standardized */
+  .controls .btn{margin-left:12px;padding:18px 32px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:18px}
+  .start-area .btn{padding:14px 20px;font-size:16px}
+  .btn.primary{background:#2563eb;color:white}
+  .btn.success{background:#10b981;color:white}
+  .btn.destructive{background:var(--destructive);color:white}
+
+  /* settings card */
+  .settings.card{padding:28px;border-radius:12px;font-size:18px;display:flex;flex-direction:column;justify-content:flex-start;overflow:auto;max-height:none;min-height:260px;width:100%;background:#ffffff}
+  .settings.card h4{font-size:20px;margin:0 0 10px}
+  .settings.card div{font-size:16px;margin-bottom:8px}
+
+  /* info cards */
+  .info-card{font-size:18px;padding:18px;border-radius:10px;background:#f3f4f6;text-align:center}
   .monitoring-page, .content { box-sizing: border-box; }
-    .stats-box{display:flex;gap:20px;margin-top:18px}
-    .card-bottom{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid #eef2f6}
-    .note{color:#6b7280;font-size:13px}
-    .btn.primary{background:#2563eb;color:white}
-    .btn.success{background:#10b981;color:white}
-    .recommendations.card{background:#f8fafc;padding:18px;border-radius:10px}
-    .info-row{display:flex;gap:14px;margin-top:14px}
-    .info-card{flex:1;background:#f3f4f6;padding:14px;border-radius:8px;text-align:center;font-weight:600}
-  .settings.card{padding:16px;border-radius:8px;background:var(--card)}
-    .start-area{display:flex;gap:12px;margin-top:12px}
-    .btn.destructive{background:var(--destructive);color:white}
+  .stats-box{display:flex;gap:20px;margin-top:18px}
+  .note{color:#6b7280;font-size:13px}
   `]
 })
 export class ActiveMonitoringComponent {

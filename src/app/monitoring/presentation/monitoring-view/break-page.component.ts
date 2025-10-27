@@ -38,13 +38,13 @@ function msToHms(ms: number) {
   `,
   styles: [`
   .break-wrap{padding:12px;display:flex;justify-content:center;min-height:calc(100vh - 88px)}
-  .break-panel{width:1400px;max-width:95vw;background:var(--card);padding:36px;border-radius:12px;max-height:calc(100vh - 120px);overflow:auto}
-  .summary{display:flex;gap:22px}
-  .box{flex:1;background:white;padding:28px;border-radius:12px;text-align:center;font-size:18px;max-height:50vh;overflow:auto}
-  .exercises{display:flex;gap:20px;margin-top:26px}
-  .exercise img{width:340px;height:190px;object-fit:cover;border-radius:12px}
-  .actions{margin-top:26px;text-align:center}
-  .btn.primary{background:white;color:white;padding:20px 26px;font-size:20px;border-radius:12px}
+    .break-panel{width:1400px;max-width:95vw;background:#ffffff;padding:40px;border-radius:14px;max-height:calc(100vh - 120px);overflow:auto}
+    .summary{display:flex;gap:26px}
+    .box{flex:1;background:#e9ecef;padding:36px;border-radius:14px;text-align:center;font-size:22px;max-height:50vh;overflow:auto}
+    .exercises{display:flex;gap:24px;margin-top:28px}
+    .exercise img{width:420px;height:260px;object-fit:cover;border-radius:12px}
+    .actions{margin-top:26px;text-align:center}
+    .btn.primary{background:var(--primary);color:white;padding:18px 34px;font-size:18px;border-radius:12px}
   `]
 })
 export class BreakPageComponent {
