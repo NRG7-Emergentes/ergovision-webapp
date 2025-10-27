@@ -12,6 +12,7 @@ export type PieChartOptions = {
   chart: ApexChart;
   responsive: ApexResponsive[];
   labels: any;
+  legend: ApexLegend;
 };
 
 @Component({
@@ -48,6 +49,7 @@ export type PieChartOptions = {
               [chart]="pieChartOptions.chart"
               [labels]="pieChartOptions.labels"
               [responsive]="pieChartOptions.responsive"
+              [legend]="pieChartOptions.legend"
             ></apx-chart>
           </div>
         </div>
@@ -200,6 +202,11 @@ export class StatsPageComponent {
         type: "pie"
       },
       labels: ["Team A", "Team B", "Team C", "Team D", "Team E"],
+      legend: {
+        labels: {
+          colors: '#FFFFFF'
+        }
+      },
       responsive: [
         {
           breakpoint: 480,
