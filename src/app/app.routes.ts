@@ -10,10 +10,9 @@ import { SessionPageComponent } from '@app/history/pages/session-page/session-pa
 export const routes: Routes = [
   { path: 'dashboard/:id' , component: MainDashboardComponent},
   { path: 'progress/:id' , component: StatsPageComponent},
-  {path: 'monse', component: MonseCamComponent},
+  { path: 'monse', component: MonseCamComponent},
   { path: 'monitoring/start', component: StartMonitoringComponent },
-  { path: 'monse', component: MonseCamComponent },
-  { path: 'history', component: HistoryPageComponent },        // follow the same template as 'monse'
-  { path: 'history/:id', component: SessionPageComponent },    // explicit detail route
+  { path: 'history', component: HistoryPageComponent },
+  { path: 'history/:id', component: SessionPageComponent },
   { path: '' , component: TestPageComponent }
 ];
