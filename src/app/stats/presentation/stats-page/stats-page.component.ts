@@ -25,8 +25,10 @@ export type PieChartOptions = {
         <h1 class="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">Progress Analytics</h1>
         <p class="text-muted-foreground mt-2">Track your posture monitoring insights and improvements</p>
       </div>
-      <div class="grid grid-cols-3 md:grid-cols-3 grid-rows-3 md:grid-rows-3 gap-2 md:gap-2 m-4">
+      <div class="grid grid-cols-3 md:grid-cols-3 grid-rows-3 md:grid-rows-3 gap-2 md:gap-2 ">
         <div class="col-start-1 row-start-1 col-span-2 md:col-start-1 md:row-start-1 md:col-span-1 md:row-span-2 bg-card block border p-6 rounded-lg shadow-sm text-card-foreground">
+          <p class="text-xl font-semibold text-foreground ">Score Progress - Last 4 Months</p>
+          <p class="text-xs text-muted-foreground font-medium">Your posture score trend over time</p>
           <apx-chart
             [series]="columnScoreChartOptions.series"
             [chart]="columnScoreChartOptions.chart"
@@ -38,17 +40,21 @@ export type PieChartOptions = {
           ></apx-chart>
         </div>
         <div class="col-start-1 row-start-2 col-span-3 md:col-start-3 md:row-start-1 md:col-span-1 md:row-span-2 bg-card block border p-6 rounded-lg shadow-sm text-card-foreground">
-          <apx-chart
-            [series]="pieChartOptions.series"
-            [chart]="pieChartOptions.chart"
-            [labels]="pieChartOptions.labels"
-            [responsive]="pieChartOptions.responsive"
-          ></apx-chart>
+          <p class="text-xl font-semibold text-foreground ">Posture Quality Distribution</p>
+          <p class="text-xs text-muted-foreground font-medium">Breakdown of your posture quality levels</p>
+          <div class="flex justify-center items-center h-full">
+            <apx-chart
+              [series]="pieChartOptions.series"
+              [chart]="pieChartOptions.chart"
+              [labels]="pieChartOptions.labels"
+              [responsive]="pieChartOptions.responsive"
+            ></apx-chart>
+          </div>
         </div>
         <div class="col-start-3 row-start-1 md:col-start-2 md:row-start-1 md:col-span-1 md:row-span-1 bg-card block border p-6 rounded-lg shadow-sm text-card-foreground">
-          <div class="flex">
+          <div class="flex flex-col h-full">
             <div class="flex items-center justify-between ">
-              <span class="text-md text-muted-foreground font-medium tracking-widest">All Time Average Score</span>
+              <span class="text-xl text-muted-foreground font-medium tracking-widest">All Time Average Score</span>
               <div class="p-2.5 rounded-lg flex-shrink-0 bg-primary/10">
                 <div class="aspect-square w-5 h-5 flex justify-center items-center">
                   <i class="icon-chart-column text-primary  "></i>
@@ -56,17 +62,76 @@ export type PieChartOptions = {
               </div>
             </div>
             <div class="flex items-baseline gap-1">
-              <span class="text-6xl font-extrabold text-foreground">78.5</span>
-              <span class="text-sm text-muted-foreground font-medium">%</span>
+              <span class="text-8xl font-extrabold text-foreground">78.5</span>
+              <span class="text-2xl text-muted-foreground font-medium">%</span>
             </div>
-            <div class="flex-1 bg-black">
-              <span class="text-xs text-muted-foreground font-medium ">Your overall posture quality score</span>
+            <div class="flex-1 ">
+              <p class="text-xs text-muted-foreground font-medium ">Your overall posture quality score</p>
             </div>
           </div>
         </div>
-        <div class="col-start-1 row-start-3 md:col-start-2 md:row-start-2 md:col-span-1 md:row-span-1 bg-card block border p-6 rounded-lg shadow-sm text-card-foreground">3</div>
-        <div class="col-start-2 row-start-3 md:col-start-1 md:row-start-3 md:col-span-2 md:row-span-1 bg-card block border p-6 rounded-lg shadow-sm text-card-foreground">4</div>
-        <div class="col-start-3 row-start-3 md:col-start-3 md:row-start-3 md:col-span-1 md:row-span-1 bg-card block border p-6 rounded-lg shadow-sm text-card-foreground">5</div>
+        <div class="col-start-1 row-start-3 md:col-start-2 md:row-start-2 md:col-span-1 md:row-span-1 bg-card block border p-6 rounded-lg shadow-sm text-card-foreground">
+          <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between ">
+              <span class="text-xl text-muted-foreground font-medium tracking-widest">Avg Session Time</span>
+              <div class="p-2.5 rounded-lg flex-shrink-0 bg-primary/10">
+                <div class="aspect-square w-5 h-5 flex justify-center items-center">
+                  <i class="icon-clock text-primary  "></i>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-8xl font-extrabold text-foreground">45</span>
+              <span class="text-2xl text-muted-foreground font-medium">min</span>
+            </div>
+            <div class="flex-1 ">
+              <p class="text-xs text-muted-foreground font-medium ">Average monitoring duration</p>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="col-start-1 row-start-3 col-span-3 md:col-start-1 md:row-start-3 md:col-span-3 md:row-span-1 bg-card block border p-6 rounded-lg shadow-sm text-card-foreground">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col h-full border-r px-6">
+              <div class="flex items-center justify-between ">
+                <span class="text-xl text-muted-foreground font-medium tracking-widest">Avg Active Pauses</span>
+                <div class="p-2.5 rounded-lg flex-shrink-0 bg-primary/10">
+                  <div class="aspect-square w-5 h-5 flex justify-center items-center">
+                    <i class="icon-zap text-primary  "></i>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-8xl font-extrabold text-foreground">3.2</span>
+                <span class="text-2xl text-muted-foreground font-medium">per session</span>
+              </div>
+              <div class="flex-1 ">
+                <p class="text-xs text-muted-foreground font-medium ">Rest breaks per monitoring session</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col h-full px-6">
+              <div class="flex items-center justify-between ">
+                <span class="text-xl text-muted-foreground font-medium tracking-widest">Total Time Monitored</span>
+                <div class="p-2.5 rounded-lg flex-shrink-0 bg-primary/10">
+                  <div class="aspect-square w-5 h-5 flex justify-center items-center">
+                    <i class="icon-chart-column text-primary  "></i>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-8xl font-extrabold text-foreground">12</span>
+                <span class="text-2xl text-muted-foreground font-medium"> h</span>
+              </div>
+              <div class="flex-1 ">
+                <p class="text-xs text-muted-foreground font-medium ">Your total time you have monitored your posture</p>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
 
       </div>
     </div>
@@ -87,11 +152,11 @@ export class StatsPageComponent {
       series: [
         {
           name: "score",
-          data: [10, 41, 35, 51, 49, 62, 69]
+          data: [10, 41, 35, 51]
         }
       ],
       chart: {
-        height: 350,
+        height: 300,
         type: "bar",
         foreColor: "#FFFFFF",
         toolbar: {
@@ -105,7 +170,7 @@ export class StatsPageComponent {
         }
       },
       xaxis: {
-        categories: ["Mon", "Tue",  "Wed",  "Thu",  "Fri",  "Sat",  "Sun"]
+        categories: ["May", "June",  "July",  "August"]
       },
       tooltip: {
         theme: 'dark',
