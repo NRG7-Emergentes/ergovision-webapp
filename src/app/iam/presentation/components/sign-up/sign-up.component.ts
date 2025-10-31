@@ -315,7 +315,7 @@ import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovi
                 <p class="text-sm text-muted-foreground">
                   ¿Already have an account?
                   <a
-                    routerLink="/signin"
+                    routerLink="/sign-in"
                     class="text-primary hover:text-primary/90 font-medium transition-colors ml-1"
                   >
                     Sign In
