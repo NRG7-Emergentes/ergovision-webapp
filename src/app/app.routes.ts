@@ -10,18 +10,18 @@ import {ProfileComponent} from '@app/profiles/presentation/components/profile/pr
 import {SignInComponent} from '@app/iam/presentation/components/sign-in/sign-in.component';
 import {SignUpComponent} from '@app/iam/presentation/components/sign-up/sign-up.component';
 import {NotFoundComponent} from '@app/public/pages/not-found/not-found.component';
+import { authGuard } from '@app/iam/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: 'dashboard/:id' , component: MainDashboardComponent},
-  { path: 'progress/:id' , component: StatsPageComponent},
-  { path: 'monse', component: MonseCamComponent},
-  { path: 'monitoring/start', component: StartMonitoringComponent },
-  { path: 'history', component: HistoryPageComponent },
-  { path: 'history/:id', component: SessionPageComponent },
-  { path: 'sign-in', component: SignInComponent},
-  { path: 'sign-up', component: SignUpComponent},
-  {path: 'profile', component: ProfileComponent},
-  { path: '' , component: TestPageComponent },
-  { path: 'not-found' , component: NotFoundComponent}
-
+  { path: 'dashboard/:id', component: MainDashboardComponent, canActivate: [authGuard] },
+  { path: 'progress/:id', component: StatsPageComponent, canActivate: [authGuard] },
+  { path: 'monse', component: MonseCamComponent, canActivate: [authGuard] },
+  { path: 'monitoring/start', component: StartMonitoringComponent, canActivate: [authGuard] },
+  { path: 'history', component: HistoryPageComponent, canActivate: [authGuard] },
+  { path: 'history/:id', component: SessionPageComponent, canActivate: [authGuard] },
+  { path: 'sign-in', component: SignInComponent },
+  { path: 'sign-up', component: SignUpComponent },
+  { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+  { path: '' , component: TestPageComponent, canActivate: [authGuard] },
+  { path: '**', component: NotFoundComponent }
 ];

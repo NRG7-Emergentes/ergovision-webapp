@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
+import {AuthService} from "@app/iam/services/auth.service";
 
 @Component({
   selector: 'app-sign-in',
@@ -123,7 +124,7 @@ import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovi
                   <p class="text-sm text-muted-foreground">
                     ¿Don't have an account?
                     <a
-                      routerLink="/signup"
+                      routerLink="/sign-up"
                       class="text-primary hover:text-primary/90 font-medium transition-colors ml-1"
                     >
                       Sign Up
@@ -153,6 +154,11 @@ import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovi
   styles: ``
 })
 export class SignInComponent {
+
+  protected readonly authService = inject(AuthService);
+  private router = inject(Router);
+
+
   credentials = {
     username: '',
     password: '',
@@ -167,15 +173,11 @@ export class SignInComponent {
   }
 
   onSubmit() {
-    if (this.isLoading) return;
+    this.authService.login();
 
-    this.isLoading = true;
+    if ( this.authService.isAuthenticated()){
+      this.router.navigate(['/dashboard', 'monse-pi']);
+    }
 
-
-    setTimeout(() => {
-      console.log('Login attempt with:', this.credentials);
-
-      this.isLoading = false;
-    }, 1500);
   }
 }

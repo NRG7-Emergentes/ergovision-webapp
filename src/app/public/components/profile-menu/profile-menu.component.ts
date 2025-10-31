@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import {ZardDropdownModule} from '@shared/components/dropdown/dropdown.module';
 import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
 import { Router } from '@angular/router';
+import {AuthService} from '@app/iam/services/auth.service';
 
 @Component({
   selector: 'app-profile-menu',
@@ -27,7 +28,7 @@ import { Router } from '@angular/router';
           <i class="icon-timer ml-1"></i>
           History
         </z-dropdown-menu-item>
-        <z-dropdown-menu-item >
+        <z-dropdown-menu-item (click)="logOut()">
           <i class="icon-log-out ml-1"></i>
           Logout
         </z-dropdown-menu-item>
@@ -38,6 +39,12 @@ import { Router } from '@angular/router';
 })
 export class ProfileMenuComponent {
   private router = inject(Router);
+  private readonly authService = inject(AuthService);
+
+  logOut() {
+    this.authService.logout();
+    this.router.navigate(['sign-in']);
+  }
 
   goHistory() {
     this.router.navigate(['history']);
