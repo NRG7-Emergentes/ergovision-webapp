@@ -11,16 +11,21 @@ import {AuthService} from '@app/iam/services/auth.service';
   selector: 'app-root',
   imports: [RouterOutlet, NavbarComponent, FooterComponent, ZardToastComponent],
   template: `
-    <div class="grid min-h-dvh grid-rows-[auto_1fr_auto] font-inter">
-      @if (authService.isAuthenticated()) {
-        <app-navbar/>
-      }
-      <div class="">
-        <router-outlet  />
-        <z-toaster />
-      </div>
-      @if (authService.isAuthenticated()) {
-        <app-footer/>
+    <div class="font-inter">
+      @if(authService.isAuthenticated()) {
+        <div class="grid min-h-dvh grid-rows-[auto_1fr_auto]">
+          <app-navbar/>
+          <div class="">
+            <router-outlet  />
+            <z-toaster />
+          </div>
+          <app-footer/>
+        </div>
+        } @else {
+        <div class="min-h-dvh">
+          <router-outlet  />
+          <z-toaster />
+        </div>
       }
     </div>
   `,

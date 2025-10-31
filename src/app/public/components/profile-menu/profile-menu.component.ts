@@ -50,6 +50,6 @@ export class ProfileMenuComponent {
     this.router.navigate(['history']);
   }
   goToProfile(): void {
-    void this.router.navigate(['/profile']);
+    void this.router.navigate(['profile']);
   }
 }

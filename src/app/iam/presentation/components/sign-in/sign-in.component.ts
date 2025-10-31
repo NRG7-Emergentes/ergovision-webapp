@@ -9,9 +9,9 @@ import {AuthService} from "@app/iam/services/auth.service";
   selector: 'app-sign-in',
   imports: [CommonModule, FormsModule, RouterModule, ErgovisionLogoComponent],
   template: `
-    <div class="min-h-screen bg-background text-foreground font-inter flex">
-      <!-- Left Side - Logo and Brand -->
-      <div class="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center lg:bg-gradient-to-br lg:from-primary lg:to-accent">
+    <div class="grid grid-cols-2 min-h-dvh">
+
+      <div class="flex items-center justify-center bg-gradient-to-br from-primary to-accent/10">
         <div class="text-center text-primary-foreground p-8">
           <app-ergovision-logo [size]="300"/>
           <h1 class="text-4xl font-bold mb-4">ErgoVision</h1>
@@ -22,11 +22,7 @@ import {AuthService} from "@app/iam/services/auth.service";
       <!-- Right Side - Login Form -->
       <div class="flex-1 flex items-center justify-center p-8">
         <div class="w-full max-w-md">
-          <!-- Mobile Logo -->
-          <div class="lg:hidden flex flex-col items-center justify-center mb-8">
-            <app-ergovision-logo [size]="100" class="block mx-auto"></app-ergovision-logo>
-            <h1 class="text-3xl font-bold text-primary mt-2">ErgoVision</h1>
-          </div>
+
 
           <!-- Login Card -->
           <div class="bg-card rounded-xl border border-border shadow-lg p-8">
