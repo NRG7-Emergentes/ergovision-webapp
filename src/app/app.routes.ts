@@ -9,6 +9,7 @@ import { SessionPageComponent } from '@app/history/pages/session-page/session-pa
 import {ProfileComponent} from '@app/profiles/presentation/components/profile/profile.component';
 import {SignInComponent} from '@app/iam/presentation/components/sign-in/sign-in.component';
 import {SignUpComponent} from '@app/iam/presentation/components/sign-up/sign-up.component';
+import {NotFoundComponent} from '@app/public/pages/not-found/not-found.component';
 
 export const routes: Routes = [
   { path: 'dashboard/:id' , component: MainDashboardComponent},
@@ -20,5 +21,7 @@ export const routes: Routes = [
   { path: 'sign-in', component: SignInComponent},
   { path: 'sign-up', component: SignUpComponent},
   {path: 'profile', component: ProfileComponent},
-  { path: '' , component: TestPageComponent }
+  { path: '' , component: TestPageComponent },
+  { path: 'not-found' , component: NotFoundComponent}
+
 ];
