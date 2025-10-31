@@ -6,6 +6,9 @@ import {StatsPageComponent} from '@app/stats/presentation/stats-page/stats-page.
 import {StartMonitoringComponent} from '@app/monitoring/presentation/monitoring-view/start-monitoring.component';
 import { HistoryPageComponent } from '@app/history/pages/history-page/history-page.component';
 import { SessionPageComponent } from '@app/history/pages/session-page/session-page.component';
+import {ProfileComponent} from '@app/profiles/presentation/components/profile/profile.component';
+import {SignInComponent} from '@app/iam/presentation/components/sign-in/sign-in.component';
+import {SignUpComponent} from '@app/iam/presentation/components/sign-up/sign-up.component';
 
 export const routes: Routes = [
   { path: 'dashboard/:id' , component: MainDashboardComponent},
@@ -14,5 +17,8 @@ export const routes: Routes = [
   { path: 'monitoring/start', component: StartMonitoringComponent },
   { path: 'history', component: HistoryPageComponent },
   { path: 'history/:id', component: SessionPageComponent },
+  { path: 'sign-in', component: SignInComponent},
+  { path: 'sign-up', component: SignUpComponent},
+  {path: 'profile', component: ProfileComponent},
   { path: '' , component: TestPageComponent }
 ];

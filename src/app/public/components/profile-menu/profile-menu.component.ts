@@ -14,7 +14,8 @@ import { Router } from '@angular/router';
       </div>
       <z-dropdown-menu-content #menu="zDropdownMenuContent" class="w-56">
         <z-dropdown-menu-label>My Account</z-dropdown-menu-label>
-        <z-dropdown-menu-item >
+
+        <z-dropdown-menu-item (click)="goToProfile()">
           <i class="icon-circle-user ml-1"></i>
           Profile
         </z-dropdown-menu-item>
@@ -40,5 +41,8 @@ export class ProfileMenuComponent {
 
   goHistory() {
     this.router.navigate(['history']);
+  }
+  goToProfile(): void {
+    void this.router.navigate(['/profile']);
   }
 }
