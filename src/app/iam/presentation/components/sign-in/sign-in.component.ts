@@ -1,13 +1,22 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
 import {AuthService} from "@app/iam/services/auth.service";
+import {ZardCardComponent} from '@shared/components/card/card.component';
+import {ZardButtonComponent} from '@shared/components/button/button.component';
+import {
+  ZardFormControlComponent,
+  ZardFormFieldComponent,
+  ZardFormLabelComponent
+} from '@shared/components/form/form.component';
+import {ZardCheckboxComponent} from '@shared/components/checkbox/checkbox.component';
+import {ZardInputDirective} from '@shared/components/input/input.directive';
 
 @Component({
   selector: 'app-sign-in',
-  imports: [CommonModule, FormsModule, RouterModule, ErgovisionLogoComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ErgovisionLogoComponent, ZardCardComponent, ReactiveFormsModule, ZardButtonComponent, ZardFormControlComponent, ZardFormLabelComponent, ZardFormFieldComponent, ZardCheckboxComponent, ZardInputDirective],
   template: `
     <div class="grid grid-cols-2 min-h-dvh">
 
@@ -19,132 +28,47 @@ import {AuthService} from "@app/iam/services/auth.service";
         </div>
       </div>
 
-      <!-- Right Side - Login Form -->
-      <div class="flex-1 flex items-center justify-center p-8">
-        <div class="w-full max-w-md">
-
-
-          <!-- Login Card -->
-          <div class="bg-card rounded-xl border border-border shadow-lg p-8">
-            <div class="text-center mb-8">
-              <h2 class="text-2xl font-bold text-card-foreground">Sign In</h2>
-              <p class="text-muted-foreground mt-2">Accede a tu cuenta de ErgoVision</p>
-            </div>
-
-            <form (ngSubmit)="onSubmit()" class="space-y-6">
-              <!-- Username/Email Field -->
-              <div>
-                <label for="username" class="block text-sm font-medium text-foreground mb-2">
-                  Usuario o Email
-                </label>
-                <div class="relative">
-                  <i class="lucide lucide-user absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4"></i>
-                  <input
-                    id="username"
-                    type="text"
-                    [(ngModel)]="credentials.username"
-                    name="username"
-                    required
-                    class="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors"
-                    placeholder="Ingresa tu usuario o email"
-                  >
-                </div>
-              </div>
-
-              <!-- Password Field -->
-              <div>
-                <label for="password" class="block text-sm font-medium text-foreground mb-2">
-                  Contraseña
-                </label>
-                <div class="relative">
-                  <i class="lucide lucide-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4"></i>
-                  <input
-                    id="password"
-                    [type]="showPassword ? 'text' : 'password'"
-                    [(ngModel)]="credentials.password"
-                    name="password"
-                    required
-                    class="w-full pl-10 pr-10 py-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-colors"
-                    placeholder="Ingresa tu contraseña"
-                  >
-                  <button
-                    type="button"
-                    (click)="togglePasswordVisibility()"
-                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <i [class]="showPassword ? 'lucide lucide-eye-off' : 'lucide lucide-eye'" class="w-4 h-4"></i>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Remember Me Checkbox -->
-              <div class="flex items-center justify-between">
-                <label class="flex items-center text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    [(ngModel)]="credentials.rememberMe"
-                    name="rememberMe"
-                    class="w-4 h-4 text-primary bg-input border-border rounded focus:ring-ring focus:ring-2"
-                  >
-                  <span class="ml-2">Recordar sesión</span>
-                </label>
-              </div>
-
-              <!-- Sign In Button -->
-              <button
-                type="submit"
-                [disabled]="isLoading"
-                class="w-full bg-primary text-primary-foreground py-3 px-4 rounded-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span *ngIf="!isLoading" class="flex items-center justify-center gap-2">
-                  <i class="lucide lucide-log-in w-4 h-4"></i>
-                  Sign In
-                </span>
-                <span *ngIf="isLoading" class="flex items-center justify-center gap-2">
-                  <i class="lucide lucide-loader-2 w-4 h-4 animate-spin"></i>
-                  Iniciando sesión...
-                </span>
-              </button>
-
-              <!-- Divider -->
-              <div class="relative my-6">
-                <div class="absolute inset-0 flex items-center">
-                  <div class="w-full border-t border-border"></div>
-                </div>
-              </div>
-
-              <!-- Links Section -->
-              <div class="space-y-4 text-center">
-                <!-- Don't have an account? -->
-                <div>
-                  <p class="text-sm text-muted-foreground">
-                    ¿Don't have an account?
-                    <a
-                      routerLink="/sign-up"
-                      class="text-primary hover:text-primary/90 font-medium transition-colors ml-1"
-                    >
-                      Sign Up
-                    </a>
-                  </p>
-                </div>
-
-                <!-- Forgot Password? -->
-                <div>
-                  <p class="text-sm text-muted-foreground">
-                    ¿Forgot Your Password?
-                    <a
-                      routerLink="/recover-password"
-                      class="text-primary hover:text-primary/90 font-medium transition-colors ml-1"
-                    >
-                      Recover Password
-                    </a>
-                  </p>
-                </div>
-              </div>
-            </form>
+      <div class=" flex items-center justify-center p-8">
+        <div class="w-full max-w-md space-y-8">
+          <div class="text-center">
+            <h1 class="text-2xl font-bold sm:text-3xl">Sign In</h1>
+            <p class="mt-2 text-sm text-muted-foreground sm:text-base">Sign in to your account to continue</p>
           </div>
+          <z-card class="p-4 sm:p-6 lg:p-8 ">
+            <form [formGroup]="loginForm" class="space-y-4 sm:space-y-6 ">
+              <z-form-field>
+                <z-form-label [zRequired]="true">Email</z-form-label>
+                <z-form-control>
+                  <input id="email" z-input type="email" formControlName="email" placeholder="name@zard.com" class="w-full"/>
+                </z-form-control>
+              </z-form-field>
+
+              <z-form-field>
+                <z-form-label [zRequired]="true">Password</z-form-label>
+                <z-form-control>
+                  <input id="password" z-input type="password" formControlName="password" placeholder="••••••••" class="w-full"/>
+                </z-form-control>
+              </z-form-field>
+
+              <div class="flex items-center gap-2">
+                <z-checkbox id="remember" formControlName="rememberMe"></z-checkbox>
+                <label for="remember" class="text-sm cursor-pointer select-none">Remember me for 30 days</label>
+              </div>
+
+              <button type="submit" z-button zFull (click)="onSubmit()"
+                      [zLoading]="isLoading()" [disabled]="this.loginForm.invalid">Sign in</button>
+            </form>
+          </z-card>
+
+          <p class="text-center text-sm text-muted-foreground">
+            Don't have an account?
+            <a z-button zType="link" href="/sign-up" class="px-0">Sign up</a>
+          </p>
+
         </div>
       </div>
+
+
     </div>
   `,
   styles: ``
@@ -153,27 +77,31 @@ export class SignInComponent {
 
   protected readonly authService = inject(AuthService);
   private router = inject(Router);
+  protected readonly isLoading = signal(false);
 
-
-  credentials = {
-    username: '',
-    password: '',
-    rememberMe: false
-  };
-
-  showPassword = false;
-  isLoading = false;
-
-  togglePasswordVisibility() {
-    this.showPassword = !this.showPassword;
-  }
+  protected readonly loginForm = new FormGroup({
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    rememberMe: new FormControl(false),
+  });
 
   onSubmit() {
+    this.isLoading.set(true);
+
+    if (this.loginForm.invalid){
+      this.loginForm.markAllAsTouched();
+      this.loginForm.updateValueAndValidity();
+      this.isLoading.set(false);
+      return;
+    }
+
     this.authService.login();
 
     if ( this.authService.isAuthenticated()){
-      this.router.navigate(['/dashboard', 'monse-pi']);
+      this.router.navigate(['/dashboard', '123']);
     }
 
+    this.isLoading.set(false);
   }
+
 }
