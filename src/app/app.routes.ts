@@ -11,6 +11,8 @@ import {SignInComponent} from '@app/iam/presentation/components/sign-in/sign-in.
 import {SignUpComponent} from '@app/iam/presentation/components/sign-up/sign-up.component';
 import {NotFoundComponent} from '@app/public/pages/not-found/not-found.component';
 import { authGuard } from '@app/iam/guards/auth.guard';
+import {SettingsPageComponent} from '@app/orchestrator/pages/settings-page.component/settings-page.component';
+import {CalibrationPageComponent} from '@app/orchestrator/pages/calibration-page.component/calibration-page.component';
 
 export const routes: Routes = [
   { path: 'dashboard/:id', component: MainDashboardComponent, canActivate: [authGuard] },
@@ -23,5 +25,7 @@ export const routes: Routes = [
   { path: 'sign-up', component: SignUpComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: '' , component: TestPageComponent, canActivate: [authGuard] },
-  { path: '**', component: NotFoundComponent }
+  { path: '**', component: NotFoundComponent },
+  { path: 'settings' , component: SettingsPageComponent },
+  { path: 'calibration', component: CalibrationPageComponent },
 ];
