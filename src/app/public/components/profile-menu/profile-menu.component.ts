@@ -17,7 +17,7 @@ import {AuthService} from '@app/iam/services/auth.service';
       </div>
       <z-dropdown-menu-content #menu="zDropdownMenuContent" class="w-56">
         <z-dropdown-menu-label>My Account</z-dropdown-menu-label>
-        <z-dropdown-menu-item (click)="goToProfile()">
+        <z-dropdown-menu-item (click)="goToProfile()" >
           <i class="icon-circle-user ml-1"></i>
           Profile
         </z-dropdown-menu-item>

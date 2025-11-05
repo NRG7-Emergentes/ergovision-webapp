@@ -27,7 +27,7 @@ import {onlyNumbersValidator} from '@shared/utils/number.validator';
           <p class="text-primary-foreground/80 text-lg">Tu visión de la ergonomía en un solo lugar</p>
         </div>
       </div>
-      <div class=" flex items-center justify-center p-8">
+      <div class=" flex items-center justify-center p-8 bg-background">
         <div class="w-full max-w-md space-y-8">
           <div class="text-center">
             <h1 class="text-2xl font-bold sm:text-3xl">Sign Up</h1>

@@ -28,7 +28,7 @@ import {ZardInputDirective} from '@shared/components/input/input.directive';
         </div>
       </div>
 
-      <div class=" flex items-center justify-center p-8">
+      <div class=" flex items-center justify-center p-8 bg-background">
         <div class="w-full max-w-md space-y-8">
           <div class="text-center">
             <h1 class="text-2xl font-bold sm:text-3xl">Sign In</h1>
