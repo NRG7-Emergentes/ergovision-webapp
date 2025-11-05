@@ -11,7 +11,7 @@ import {AuthService} from '@app/iam/services/auth.service';
   selector: 'app-root',
   imports: [RouterOutlet, NavbarComponent, FooterComponent, ZardToastComponent],
   template: `
-    <div class="font-inter">
+    <div class="font-inter bg-background">
       @if(authService.isAuthenticated()) {
         <div class="grid min-h-dvh grid-rows-[auto_1fr_auto]">
           <app-navbar/>

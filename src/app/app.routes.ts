@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import {MainDashboardComponent} from '@app/public/pages/main-dashboard/main-dashboard.component';
 import {TestPageComponent} from '@app/public/pages/test-page/test-page.component';
-import {MonseCamComponent} from '@app/public/pages/monse-cam/monse-cam.component';
 import {StatsPageComponent} from '@app/stats/presentation/stats-page/stats-page.component';
 import {StartMonitoringComponent} from '@app/monitoring/presentation/monitoring-view/start-monitoring.component';
 import { HistoryPageComponent } from '@app/history/pages/history-page/history-page.component';
@@ -11,8 +10,8 @@ import {SignInComponent} from '@app/iam/presentation/components/sign-in/sign-in.
 import {SignUpComponent} from '@app/iam/presentation/components/sign-up/sign-up.component';
 import {NotFoundComponent} from '@app/public/pages/not-found/not-found.component';
 import { authGuard } from '@app/iam/guards/auth.guard';
-import {SettingsPageComponent} from '@app/orchestrator/pages/settings-page.component/settings-page.component';
-import {CalibrationPageComponent} from '@app/orchestrator/pages/calibration-page.component/calibration-page.component';
+import {SettingsPageComponent} from '@app/orchestrator/pages/settings-page/settings-page.component';
+import {CalibrationPageComponent} from '@app/orchestrator/pages/calibration-page/calibration-page.component';
 
 export const routes: Routes = [
   { path: 'dashboard/:id', component: MainDashboardComponent, canActivate: [authGuard] },
