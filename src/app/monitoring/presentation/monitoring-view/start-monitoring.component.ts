@@ -10,10 +10,32 @@ import {toast} from 'ngx-sonner';
   imports: [MonitorCamComponent, ZardButtonComponent],
   template: `
     <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-row-reverse gap-4 mb-8">
-        <div class="flex-1">
+      <div class="grid grid-cols-3 gap-4 mb-8">
+        <div class="col-span-2 overflow-hidden rounded-lg border ">
+          @if (available) {
+            <div class="w-full h-auto object-cover block">
+              <app-monitor-cam />
+            </div>
+          }
+          @else {
+            <div class="bg-card border-border p-6 rounded-lg shadow-sm h-full flex flex-col">
+              <div class="flex-1 flex items-center justify-center bg-secondary rounded-lg  relative overflow-hidden">
+                <div class="flex flex-col items-center justify-center gap-4">
+                  <div class="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                    <i class="icon-video text-muted-foreground " style="font-size: 2rem;"></i>
+                  </div>
+                  <div class="text-center">
+                    <p class="text-foreground font-semibold text-lg">Camera feed is off</p>
+                    <p class="text-muted-foreground text-sm mt-1">Click "Give Permission" to continue</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="col-span-1">
           <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
-            <h2 class="text-xl font-bold text-foreground mb-4 -tracking-normal mb-4">Recommendations</h2>
+            <h2 class="text-xl font-bold text-foreground mb-4 -tracking-normal">Recommendations</h2>
             <div class="flex flex-col gap-4">
               <div class="flex gap-4 p-4 bg-secondary rounded-lg hover:bg-muted transition-colors duration-200">
                 <div class="flex items-center gap-4">
@@ -69,28 +91,7 @@ import {toast} from 'ngx-sonner';
             </div>
           </div>
         </div>
-        <div class="flex-2 overflow-hidden rounded-lg border ">
-          @if (available) {
-            <div class="w-full h-auto object-cover block">
-              <app-monitor-cam />
-            </div>
-          }
-          @else {
-            <div class="bg-card border-border p-6 rounded-lg shadow-sm h-full flex flex-col">
-              <div class="flex-1 flex items-center justify-center bg-secondary rounded-lg  relative overflow-hidden">
-                <div class="flex flex-col items-center justify-center gap-4">
-                  <div class="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
-                    <i class="icon-video text-muted-foreground " style="font-size: 2rem;"></i>
-                  </div>
-                  <div class="text-center">
-                    <p class="text-foreground font-semibold text-lg">Camera feed is off</p>
-                    <p class="text-muted-foreground text-sm mt-1">Click "Give Permission" to continue</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
+
 
       </div>
       <div class="flex gap-4 ">

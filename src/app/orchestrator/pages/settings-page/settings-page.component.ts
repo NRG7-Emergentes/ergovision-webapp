@@ -1,10 +1,11 @@
-import {Component, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {ZardSwitchComponent} from '@shared/components/switch/switch.component';
 import {ZardSliderComponent} from '@shared/components/slider/slider.component';
 import {ZardSelectComponent} from '@shared/components/select/select.component';
 import {ZardSelectItemComponent} from '@shared/components/select/select-item.component';
 import {FormsModule} from '@angular/forms';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-settings-page',
@@ -141,7 +142,7 @@ import {ZardButtonComponent} from '@shared/components/button/button.component';
                   <p class="text-foreground font-semibold"> 20°</p>
                 </div>
               </div>
-              <button z-button zType="default" class="w-full mt-8" zSize="lg" > Recalibrate</button>
+              <button z-button zType="default" class="w-full mt-8" zSize="lg" (click)="goToCalibration()"> Recalibrate</button>
             </div>
           </div>
         </div>
@@ -156,4 +157,10 @@ export class SettingsPageComponent {
   protected readonly sampleFrequency = signal<string>('1');
   protected readonly alertInterval = signal<string>('1');
   protected readonly showSkeleton = signal<boolean>(true);
+
+  private router = inject(Router);
+
+  goToCalibration() {
+    this.router.navigate(['calibration']);
+  }
 }
