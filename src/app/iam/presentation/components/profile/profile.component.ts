@@ -6,11 +6,10 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-profile',
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <!-- Encabezado-->
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-primary mb-2">My Profile</h1>
-        <p class="text-muted-foreground">Manage your personal information</p>
+    <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div class="mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">My Profile</h1>
+        <p class="text-muted-foreground mt-2">Manage your personal information</p>
       </div>
 
       <div class="bg-card rounded-xl border border-border shadow-lg overflow-hidden">
@@ -97,8 +96,10 @@ import { FormsModule } from '@angular/forms';
             <div *ngSwitchCase="false" class="space-y-4">
               <!-- Información Personal -->
               <div class="bg-sidebar rounded-lg p-4">
-                <h3 class="text-lg font-semibold text-sidebar-foreground mb-3 flex items-center gap-2">
-                  <i class="lucide lucide-user w-5 h-5"></i>
+                <h3 class="text-lg font-semibold text-sidebar-foreground mb-3  flex items-center gap-2">
+                  <div class="aspect-square w-5 h-5 flex justify-center items-center">
+                    <i class="icon-user  "></i>
+                  </div>
                   Personal Information
                 </h3>
 
