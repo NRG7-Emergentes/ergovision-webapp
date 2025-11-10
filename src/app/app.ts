@@ -12,7 +12,7 @@ import {AuthService} from '@app/iam/services/auth.service';
   imports: [RouterOutlet, NavbarComponent, FooterComponent, ZardToastComponent],
   template: `
     <div class="font-inter ">
-      @if(authService.isAuthenticated()) {
+
         <div class="grid min-h-dvh grid-rows-[auto_1fr_auto]">
           <app-navbar/>
           <div class="">
@@ -21,12 +21,7 @@ import {AuthService} from '@app/iam/services/auth.service';
           </div>
           <app-footer/>
         </div>
-        } @else {
-        <div class="min-h-dvh">
-          <router-outlet  />
-          <z-toaster />
-        </div>
-      }
+
     </div>
   `,
   styles: `

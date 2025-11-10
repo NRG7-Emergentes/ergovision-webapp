@@ -1,6 +1,6 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
 import {AuthService} from "@app/iam/services/auth.service";
@@ -13,6 +13,8 @@ import {
 } from '@shared/components/form/form.component';
 import {ZardCheckboxComponent} from '@shared/components/checkbox/checkbox.component';
 import {ZardInputDirective} from '@shared/components/input/input.directive';
+import {BaseFormComponent} from "@shared/components/base-form.component";
+import {SignInRequest} from '@app/iam/domain/model/sign-in.request';
 
 @Component({
   selector: 'app-sign-in',
@@ -35,11 +37,11 @@ import {ZardInputDirective} from '@shared/components/input/input.directive';
             <p class="mt-2 text-sm text-muted-foreground sm:text-base">Sign in to your account to continue</p>
           </div>
           <z-card class="p-4 sm:p-6 lg:p-8 ">
-            <form [formGroup]="loginForm" class="space-y-4 sm:space-y-6 ">
+            <form [formGroup]="form" class="space-y-4 sm:space-y-6 ">
               <z-form-field>
                 <z-form-label [zRequired]="true">Email</z-form-label>
                 <z-form-control>
-                  <input id="email" z-input type="email" formControlName="email" placeholder="name@zard.com" class="w-full"/>
+                  <input id="email" z-input type="email" formControlName="username" placeholder="name@zard.com" class="w-full"/>
                 </z-form-control>
               </z-form-field>
 
@@ -55,8 +57,7 @@ import {ZardInputDirective} from '@shared/components/input/input.directive';
                 <label for="remember" class="text-sm cursor-pointer select-none">Remember me for 30 days</label>
               </div>
 
-              <button type="submit" z-button zFull (click)="onSubmit()"
-                      [zLoading]="isLoading()" [disabled]="this.loginForm.invalid">Sign in</button>
+              <button type="submit" z-button zFull (click)="onSubmit()">Sign in</button>
             </form>
           </z-card>
 
@@ -73,35 +74,37 @@ import {ZardInputDirective} from '@shared/components/input/input.directive';
   `,
   styles: ``
 })
-export class SignInComponent {
 
-  protected readonly authService = inject(AuthService);
-  private router = inject(Router);
-  protected readonly isLoading = signal(false);
+///this.router.navigate(['/dashboard', '123']);
+export class SignInComponent extends BaseFormComponent implements OnInit{
+  form!: FormGroup;
+  submitted = false;
 
-  protected readonly loginForm = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    rememberMe: new FormControl(false),
-  });
+  constructor(private builder: FormBuilder, private authenticationService: AuthService,
+              private router: Router) {
+    super();
+  }
+
+  ngOnInit(): void {
+    this.form = this.builder.group({
+      username: ['', Validators.required],
+      password: ['', Validators.required]
+    });
+  }
 
   onSubmit() {
-    this.isLoading.set(true);
-
-    if (this.loginForm.invalid){
-      this.loginForm.markAllAsTouched();
-      this.loginForm.updateValueAndValidity();
-      this.isLoading.set(false);
+    if (this.form.invalid)
       return;
-    }
-
-    this.authService.login();
-
-    if ( this.authService.isAuthenticated()){
-      this.router.navigate(['/dashboard', '123']);
-    }
-
-    this.isLoading.set(false);
+    let username = this.form.value.username;
+    let password = this.form.value.password;
+    const signInRequest = new SignInRequest(username, password);
+    this.authenticationService.signIn(signInRequest);
+    this.submitted = true;
   }
+
+  navigateToSignUp() {
+    this.router.navigate(['/sign-up']);
+  }
+
 
 }

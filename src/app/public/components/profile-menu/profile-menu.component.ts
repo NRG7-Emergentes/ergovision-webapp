@@ -43,7 +43,7 @@ export class ProfileMenuComponent {
   private readonly authService = inject(AuthService);
 
   logOut() {
-    this.authService.logout();
+    //this.authService.logout();
     this.router.navigate(['sign-in']);
   }
 
