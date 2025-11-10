@@ -125,6 +125,7 @@ export class MonitoringStartComponent implements OnInit{
     }
   }
 
+
   goToCalibration() {
     this.router.navigate(['/calibration']);
   }
