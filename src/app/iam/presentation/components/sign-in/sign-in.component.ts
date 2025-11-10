@@ -11,12 +11,11 @@ import {
   ZardFormFieldComponent,
   ZardFormLabelComponent
 } from '@shared/components/form/form.component';
-import {ZardCheckboxComponent} from '@shared/components/checkbox/checkbox.component';
 import {ZardInputDirective} from '@shared/components/input/input.directive';
 
 @Component({
   selector: 'app-sign-in',
-  imports: [CommonModule, FormsModule, RouterModule, ErgovisionLogoComponent, ZardCardComponent, ReactiveFormsModule, ZardButtonComponent, ZardFormControlComponent, ZardFormLabelComponent, ZardFormFieldComponent, ZardCheckboxComponent, ZardInputDirective],
+  imports: [CommonModule, FormsModule, RouterModule, ErgovisionLogoComponent, ZardCardComponent, ReactiveFormsModule, ZardButtonComponent, ZardFormControlComponent, ZardFormLabelComponent, ZardFormFieldComponent, ZardInputDirective],
   template: `
     <div class="grid grid-cols-2 min-h-dvh">
 
@@ -50,10 +49,7 @@ import {ZardInputDirective} from '@shared/components/input/input.directive';
                 </z-form-control>
               </z-form-field>
 
-              <div class="flex items-center gap-2">
-                <z-checkbox id="remember" formControlName="rememberMe"></z-checkbox>
-                <label for="remember" class="text-sm cursor-pointer select-none">Remember me for 30 days</label>
-              </div>
+
 
               <button type="submit" z-button zFull (click)="onSubmit()"
                       [zLoading]="isLoading()" [disabled]="this.loginForm.invalid">Sign in</button>
@@ -82,7 +78,6 @@ export class SignInComponent {
   protected readonly loginForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    rememberMe: new FormControl(false),
   });
 
   onSubmit() {

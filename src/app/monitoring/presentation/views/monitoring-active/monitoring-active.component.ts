@@ -37,7 +37,7 @@ import {toast} from 'ngx-sonner';
             <div class="flex flex-col gap-4">
               <div class="flex justify-between items-center">
                 <span class="text-md"> Next Pause in: </span>
-                <span class="text-md text-muted-foreground"> 00:09:48 </span>
+                <span class="text-md text-muted-foreground"> {{ formatTime(nextPauseTime()) }} </span>
               </div>
               <button z-button (click)="onPauseInit()">
                 <i class="icon-pause  "></i>
@@ -131,6 +131,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   // Time tracking
   protected readonly monitoringTime = signal<number>(0); // in seconds
   protected readonly badPostureTime = signal<number>(0); // in seconds
+  protected readonly nextPauseTime = signal<number>(30); // in seconds
 
   // Pause tracking
   protected readonly isPaused = signal<boolean>(false);
@@ -142,6 +143,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
 
   // Pause timer
   private pauseTimerInterval: number | undefined;
+  private nextPauseInterval: number | undefined;
 
   // MediaPipe pose landmark indices
   private readonly POSE_LANDMARKS = {
@@ -177,6 +179,16 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
         this.monitoringTime.set(this.monitoringTime() + 1);
       }
     }, 1000);
+
+    // Start next pause timer
+    this.nextPauseInterval = window.setInterval(() => {
+      if (!this.isPaused()) {
+        this.nextPauseTime.update(t => t - 1);
+        if (this.nextPauseTime() <= 0) {
+          this.onPauseInit();
+        }
+      }
+    }, 1000);
   }
 
   ngOnDestroy(): void {
@@ -192,6 +204,10 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     if (this.pauseTimerInterval !== undefined) {
       clearInterval(this.pauseTimerInterval);
       this.pauseTimerInterval = undefined;
+    }
+    if (this.nextPauseInterval !== undefined) {
+      clearInterval(this.nextPauseInterval);
+      this.nextPauseInterval = undefined;
     }
 
     // Clean up audio
@@ -367,6 +383,9 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
 
     // Resume monitoring
     this.isPaused.set(false);
+
+    // Reset next pause timer
+    this.nextPauseTime.set(30);
 
     console.log('Pause Finished - Total pause time:', this.formatTime(this.pauseTime()));
   }
