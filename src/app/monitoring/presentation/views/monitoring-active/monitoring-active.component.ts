@@ -1,11 +1,14 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, OnInit, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
 import {MonitorCamComponent} from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {ZardSwitchComponent} from '@shared/components/switch/switch.component';
 import {FormsModule} from '@angular/forms';
-import {ZardRadioComponent} from '@shared/components/radio/radio.component';
 import {ZardSliderComponent} from '@shared/components/slider/slider.component';
 import {Router} from '@angular/router';
+import { WebsocketNotificationService } from '@app/notifications/infrastructure/websocket-notification.service';
+import { toast } from 'ngx-sonner';
+
+type MonitoringState = 'ACTIVE' | 'PAUSED' | 'FINALIZED';
 
 @Component({
   selector: 'app-monitoring-active',
@@ -14,9 +17,9 @@ import {Router} from '@angular/router';
     ZardButtonComponent,
     ZardSwitchComponent,
     FormsModule,
-    ZardRadioComponent,
     ZardSliderComponent
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-3 gap-4 mb-8">
@@ -35,10 +38,17 @@ import {Router} from '@angular/router';
                 <span class="text-md"> Next Pause in: </span>
                 <span class="text-md text-muted-foreground"> 00:09:48 </span>
               </div>
-              <button z-button>
-                <i class="icon-pause  "></i>
-                Pause
-              </button>
+              @if (currentState() === 'ACTIVE') {
+                <button z-button (click)="onPause()">
+                  <i class="icon-pause"></i>
+                  Pause
+                </button>
+              } @else if (currentState() === 'PAUSED') {
+                <button z-button (click)="onResume()">
+                  <i class="icon-play"></i>
+                  Resume
+                </button>
+              }
             </div>
           </div>
 
@@ -77,7 +87,13 @@ import {Router} from '@angular/router';
 
             </div>
             <div class="p-4 bg-secondary rounded-lg ">
-              <p class="text-2xl font-bold mb-2">You're sitting well</p>
+              <p class="text-2xl font-bold mb-2">
+                @if (currentState() === 'PAUSED') {
+                  Monitoring Paused
+                } @else {
+                  You're sitting well
+                }
+              </p>
               <div class="text-muted-foreground">
                 <span> Nose Offset:  </span>
                 <span> {{ noseOffset() }}% </span>
@@ -112,22 +128,103 @@ import {Router} from '@angular/router';
   `,
   styles: ``,
 })
-export class MonitoringActiveComponent {
-  protected readonly visualAlerts = signal<boolean>(true);
-  protected readonly soundAlerts = signal<boolean>(true);
+export class MonitoringActiveComponent implements OnInit, OnDestroy {
+  protected readonly visualAlerts = signal(true);
+  protected readonly soundAlerts = signal(true);
+  protected readonly alertInterval = signal("10");
+  protected readonly pauseInterval = signal("10");
+  protected readonly noseOffsetSensitivity = signal(43);
+  protected readonly noseOffset = signal(24.5);
 
-  protected readonly alertInterval = signal<string>("10");
+  // 🔹 Estado actual del monitoreo
+  protected readonly currentState = signal<MonitoringState>('ACTIVE');
 
-  protected readonly pauseInterval = signal<string>("10");
-  protected readonly noseOffsetSensitivity = signal<number>(43);
-  protected readonly noseOffset = signal<number>(24.5);
+  private readonly router = inject(Router);
+  private readonly wsService = inject(WebsocketNotificationService);
 
-  private router = inject(Router);
+  ngOnInit(): void {
+    this.wsService.connect();
 
-  onFinishSession(){
-    this.router.navigate(['/history']);
+    // 🔹 Escuchamos notificaciones del backend
+    this.wsService.notifications$.subscribe(notification => {
+      if (!notification) return;
+      toast.info(`[${notification.type}] ${notification.title}`, { description: notification.message });
+    });
+
+    // 🔹 Al iniciar el monitoreo, mandamos la notificación de "Active"
+    this.sendStateNotification('ACTIVE');
   }
 
+  ngOnDestroy(): void {
+    if (this.currentState() !== 'FINALIZED') {
+      this.sendStateNotification('FINALIZED');
+    }
+  }
 
+  // 🔹 Pausa el monitoreo
+  onPause(): void {
+    this.currentState.set('PAUSED');
+    this.sendStateNotification('PAUSED');
+  }
 
+  // 🔹 Resume el monitoreo
+  onResume(): void {
+    this.currentState.set('ACTIVE');
+    this.sendStateNotification('ACTIVE');
+  }
+
+  // 🔹 Finaliza sesión
+  onFinishSession(): void {
+    this.currentState.set('FINALIZED');
+    this.sendStateNotification('FINALIZED');
+
+    // 🔹 Mostrar toast de finalización
+    toast.success('Monitoring session has ended', {
+      description: 'Your session data has been saved'
+    });
+
+    // Pequeño delay antes de navegar
+    setTimeout(() => {
+      this.router.navigate(['/history']);
+    }, 1000);
+  }
+
+  private sendStateNotification(state: MonitoringState): void {
+    const notification = {
+      userId: 1,
+      title: `Monitoring ${state}`,
+      message:
+        state === 'ACTIVE'
+          ? 'Monitoring session is active'
+          : state === 'PAUSED'
+          ? 'Monitoring has been paused'
+          : 'Monitoring session has ended',
+      type: state,
+      channel: 'web',
+      preferredChannels: ['web'],
+      doNotDisturb: false
+    };
+
+    // 🔹 Enviamos la notificación REST al backend
+    this.wsService.sendNotificationViaRest(notification).subscribe({
+      next: () => {
+        console.log(`[Notification] ${state} sent`);
+
+        // 🔹 Mostrar toast según el estado
+        if (state === 'ACTIVE') {
+          toast.success('✅ Monitoring Active', {
+            description: 'Your posture is being monitored'
+          });
+        } else if (state === 'PAUSED') {
+          toast.warning('⏸️ Monitoring Paused', {
+            description: 'Click Resume to continue monitoring'
+          });
+        }
+      },
+      error: err => {
+        console.error('[Notification Error]', err);
+        toast.error('Failed to update monitoring state');
+      }
+    });
+  }
 }

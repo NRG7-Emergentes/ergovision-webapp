@@ -1,12 +1,14 @@
-import {Component, OnInit, OnDestroy, inject, signal} from '@angular/core';
+import {Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { Router } from '@angular/router';
 import { MonitorCamComponent } from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
+import { WebsocketNotificationService } from '@app/notifications/infrastructure/websocket-notification.service';
 import {toast} from 'ngx-sonner';
 
 @Component({
   selector: 'monitoring-start',
   imports: [MonitorCamComponent, ZardButtonComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-3 gap-4 mb-8">
@@ -103,39 +105,65 @@ import {toast} from 'ngx-sonner';
 })
 export class MonitoringStartComponent implements OnInit{
 
-  private router = inject(Router);
-  protected readonly cameraAvailable = signal<boolean>(false);
+  private readonly router = inject(Router);
+  private readonly wsService = inject(WebsocketNotificationService);
+
+  protected readonly cameraAvailable = signal(false);
 
   ngOnInit(): void {
     this.checkCameraAvailability();
+
+    // 🔹 Conectamos el WebSocket cuando arranca la vista
+    this.wsService.connect();
+
+    // 🔹 Esperamos a que se establezca la conexión y mostramos toast
+    setTimeout(() => {
+      if (this.wsService.connected()) {
+        toast.success('✅ Conectado al servidor de notificaciones');
+      } else {
+        toast.error('❌ No se pudo conectar al servidor de notificaciones');
+      }
+    }, 1000);
+
+    // 🔹 Escuchamos notificaciones del backend
+    this.wsService.notifications$.subscribe(notification => {
+      if (notification) {
+        toast.info(`${notification.title}: ${notification.message}`);
+      }
+    });
   }
 
   async checkCameraAvailability(): Promise<void> {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (!navigator.mediaDevices?.getUserMedia) {
       return;
     }
 
     try {
-      // We request video access and immediately stop the tracks.
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       stream.getTracks().forEach(track => track.stop());
       this.cameraAvailable.set(true);
-    } catch (err) {
+    } catch {
       this.cameraAvailable.set(false);
     }
   }
 
-  goToCalibration() {
+  goToCalibration(): void {
+    // 🔹 Verificar conexión antes de navegar
+    if (!this.wsService.connected()) {
+      toast.error('❌ No se pudo conectar al servidor de notificaciones');
+      return;
+    }
+
     this.router.navigate(['/calibration']);
   }
 
-  goToActiveMonitoring(){
-    if(this.cameraAvailable()){
-      this.router.navigate(['/monitoring/active']);
-    }
-    else{
+  goToActiveMonitoring(): void {
+    if (!this.cameraAvailable()) {
       toast.error('Camera is not available');
+      return;
     }
+
+    this.router.navigate(['/monitoring/active']);
   }
 
 }
