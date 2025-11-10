@@ -1,10 +1,11 @@
-import {Component, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {MonitorCamComponent} from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {ZardSwitchComponent} from '@shared/components/switch/switch.component';
 import {FormsModule} from '@angular/forms';
 import {ZardRadioComponent} from '@shared/components/radio/radio.component';
 import {ZardSliderComponent} from '@shared/components/slider/slider.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-monitoring-active',
@@ -66,7 +67,12 @@ import {ZardSliderComponent} from '@shared/components/slider/slider.component';
                 <z-slider class="w-full" [zMin]="0" [zMax]="100" [zStep]="1" [zValue]="noseOffsetSensitivity()"
                           [zDefault]="noseOffsetSensitivity()" (onSlide)="noseOffsetSensitivity.set($event)"/>
                 <span class="text-sm text-muted-foreground min-w-10"> {{ noseOffsetSensitivity() }} % </span>
+                <button z-button zType="secondary" class="border">
+                  Use Current
+                </button>
               </div>
+
+
 
 
             </div>
@@ -98,6 +104,10 @@ import {ZardSliderComponent} from '@shared/components/slider/slider.component';
 
 
       </div>
+      <button z-button zType="destructive" zSize="lg" (click)="onFinishSession()">
+        <i class="icon-square  "></i>
+        Finish Session
+      </button>
     </div>
   `,
   styles: ``,
@@ -111,6 +121,12 @@ export class MonitoringActiveComponent {
   protected readonly pauseInterval = signal<string>("10");
   protected readonly noseOffsetSensitivity = signal<number>(43);
   protected readonly noseOffset = signal<number>(24.5);
+
+  private router = inject(Router);
+
+  onFinishSession(){
+    this.router.navigate(['/history']);
+  }
 
 
 
