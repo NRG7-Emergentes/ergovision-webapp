@@ -1,9 +1,9 @@
 FROM node:lts-slim AS build
 WORKDIR /src
-RUN npm install -g @angular/cli
+RUN npm install -g pnpm @angular/cli
 
-COPY package*.json ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY . ./
 RUN ng build --configuration=production
