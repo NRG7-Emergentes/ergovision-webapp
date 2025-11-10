@@ -6,6 +6,7 @@ import {ZardSelectItemComponent} from '@shared/components/select/select-item.com
 import {FormsModule} from '@angular/forms';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {Router} from '@angular/router';
+import {toast} from 'ngx-sonner';
 
 @Component({
   selector: 'app-settings-page',
@@ -99,13 +100,19 @@ import {Router} from '@angular/router';
 
             </div>
           </div>
-          <h2 class="text-lg font-bold text-foreground mb-4">Notifications</h2>
-          <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
-            <div class="flex items-center justify-between">
-              <label class="text-sm font-semibold text-foreground">Mail Notifications</label>
-              <z-switch/>
+          <div>
+            <h2 class="text-lg font-bold text-foreground mb-4">Notifications</h2>
+            <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
+              <div class="flex items-center justify-between">
+                <label class="text-sm font-semibold text-foreground">Mail Notifications</label>
+                <z-switch/>
+              </div>
             </div>
           </div>
+          <button z-button zSize="lg" (click)="onConfigSave()">
+            <i class="icon-settings  "></i>
+            Save Config
+          </button>
         </div>
         <div class="space-y-6">
           <div>
@@ -162,5 +169,9 @@ export class SettingsPageComponent {
 
   goToCalibration() {
     this.router.navigate(['calibration']);
+  }
+
+  onConfigSave(){
+    toast.success('Configuration Saved');
   }
 }
