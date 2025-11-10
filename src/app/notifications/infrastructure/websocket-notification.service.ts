@@ -77,6 +77,20 @@ export class WebsocketNotificationService {
     return this.connected();
   }
 
+  // 🔹 Enviar notificación directamente vía WebSocket
+  sendNotification(title: string, message: string): void {
+    if (!this.stompClient?.connected) {
+      console.error('[WebSocket] No conectado. No se puede enviar notificación.');
+      return;
+    }
+
+    const notification = { title, message };
+
+    this.stompClient.send('/app/notify', {}, JSON.stringify(notification));
+
+    console.log('[WebSocket] Notificación enviada:', notification);
+  }
+
   // 🔹 Envío REST
   sendNotificationViaRest(notification: Notification): Observable<unknown> {
     return this.http.post(`${this.baseUrl}`, notification);
