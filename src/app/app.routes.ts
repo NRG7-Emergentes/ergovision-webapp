@@ -28,5 +28,5 @@ export const routes: Routes = [
   { path: 'calibration', component: CalibrationPageComponent, canActivate: [authGuard] },
   { path: '' , redirectTo: 'not-found', pathMatch: 'full'},
   { path: '**', component: NotFoundComponent },
-  { path: 'not-found', component: NotFoundComponent }
+  { path: 'not-found', component: NotFoundComponent, canActivate: [authGuard] }
 ];

@@ -3,9 +3,12 @@ import {MonitorCamComponent} from '@app/monitoring/presentation/components/monit
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {ZardSwitchComponent} from '@shared/components/switch/switch.component';
 import {FormsModule} from '@angular/forms';
-import {ZardRadioComponent} from '@shared/components/radio/radio.component';
 import {ZardSliderComponent} from '@shared/components/slider/slider.component';
 import {Router} from '@angular/router';
+import {ZardDialogService} from '@shared/components/dialog/dialog.service';
+import {
+  ActivePauseDialogComponent
+} from '@app/monitoring/presentation/components/active-pause-dialog/active-pause-dialog.component';
 
 @Component({
   selector: 'app-monitoring-active',
@@ -14,7 +17,6 @@ import {Router} from '@angular/router';
     ZardButtonComponent,
     ZardSwitchComponent,
     FormsModule,
-    ZardRadioComponent,
     ZardSliderComponent
   ],
   template: `
@@ -35,7 +37,7 @@ import {Router} from '@angular/router';
                 <span class="text-md"> Next Pause in: </span>
                 <span class="text-md text-muted-foreground"> 00:09:48 </span>
               </div>
-              <button z-button>
+              <button z-button (click)="onPauseInit()">
                 <i class="icon-pause  "></i>
                 Pause
               </button>
@@ -77,8 +79,8 @@ import {Router} from '@angular/router';
 
             </div>
             <div class="p-4 bg-secondary rounded-lg ">
-              <p class="text-2xl font-bold mb-2">You're sitting well</p>
-              <div class="text-muted-foreground">
+              <p class="text-2xl font-bold">You're sitting well</p>
+              <div class="text-muted-foreground text-md">
                 <span> Nose Offset:  </span>
                 <span> {{ noseOffset() }}% </span>
               </div>
@@ -123,9 +125,24 @@ export class MonitoringActiveComponent {
   protected readonly noseOffset = signal<number>(24.5);
 
   private router = inject(Router);
+  private dialogService = inject(ZardDialogService);
 
   onFinishSession(){
     this.router.navigate(['/history']);
+  }
+
+  onPauseInit(){
+    this.dialogService.create({
+      zContent: ActivePauseDialogComponent,
+      zData: {} ,
+      zOkText: 'Finish Pause',
+      zCancelText: null,
+      zOnOk: instance => {
+        console.log('Pause Finished');
+      },
+      zWidth: '1280px',
+      zClosable: false,
+    });
   }
 
 
