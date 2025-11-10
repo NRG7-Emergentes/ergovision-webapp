@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import {ZardDropdownModule} from '@shared/components/dropdown/dropdown.module';
 import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
 import { Router } from '@angular/router';
-import {AuthService} from '@app/iam/services/auth.service';
+import {AuthService} from '@app/iam/infrastructure/services/auth.service';
 
 @Component({
   selector: 'app-profile-menu',

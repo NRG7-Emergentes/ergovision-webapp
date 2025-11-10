@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-quick-summary',
@@ -36,7 +37,7 @@ import {ZardButtonComponent} from '@shared/components/button/button.component';
           </div>
 
         </div>
-        <button z-button zType="default" zSize="lg">
+        <button z-button zType="default" zSize="lg" (click)="goToMonitoring()">
           <i class="icon-play ml-1"></i>
           Start Monitoring
         </button>
@@ -47,4 +48,9 @@ import {ZardButtonComponent} from '@shared/components/button/button.component';
 })
 export class QuickSummaryComponent {
 
+  private router = inject(Router);
+
+  goToMonitoring(){
+    this.router.navigate(['/monitoring/start']);
+  }
 }

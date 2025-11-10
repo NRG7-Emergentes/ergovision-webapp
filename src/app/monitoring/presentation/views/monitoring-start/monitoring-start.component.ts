@@ -1,7 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {Component, OnInit, OnDestroy, inject, signal} from '@angular/core';
 import { Router } from '@angular/router';
-import { MonitoringService } from '@app/monitoring/presentation/monitoring-view/monitoring.service';
-import { MonitorCamComponent } from '@app/monitoring/components/monitor-cam/monitor-cam.component';
+import { MonitorCamComponent } from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import {toast} from 'ngx-sonner';
 
@@ -12,7 +11,7 @@ import {toast} from 'ngx-sonner';
     <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-3 gap-4 mb-8">
         <div class="col-span-2 overflow-hidden rounded-lg border ">
-          @if (available) {
+          @if (cameraAvailable()) {
             <div class="w-full h-auto object-cover block">
               <app-monitor-cam />
             </div>
@@ -95,18 +94,17 @@ import {toast} from 'ngx-sonner';
 
       </div>
       <div class="flex gap-4 ">
-        <button z-button zType="outline" zSize="lg" (click)="showToast()"> Calibrate </button>
-        <button z-button zSize="lg"> Start </button>
+        <button z-button zType="outline" zSize="lg" (click)="goToCalibration()"> Calibrate </button>
+        <button z-button zSize="lg" (click)="goToActiveMonitoring()"> Start </button>
       </div>
     </div>
   `,
   styles: []
 })
-export class StartMonitoringComponent {
+export class MonitoringStartComponent implements OnInit{
 
-  available = false;
-
-  constructor(private router: Router, private monitoringSvc: MonitoringService) {}
+  private router = inject(Router);
+  protected readonly cameraAvailable = signal<boolean>(false);
 
   ngOnInit(): void {
     this.checkCameraAvailability();
@@ -121,16 +119,23 @@ export class StartMonitoringComponent {
       // We request video access and immediately stop the tracks.
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       stream.getTracks().forEach(track => track.stop());
-      this.available = true;
+      this.cameraAvailable.set(true);
     } catch (err) {
-      this.available = false;
+      this.cameraAvailable.set(false);
     }
   }
 
-  showToast() {
-    toast.success('Notificacion', {
-      description: 'Esto es una noti xddd',
-    });
+  goToCalibration() {
+    this.router.navigate(['/calibration']);
+  }
+
+  goToActiveMonitoring(){
+    if(this.cameraAvailable()){
+      this.router.navigate(['/monitoring/active']);
+    }
+    else{
+      toast.error('Camera is not available');
+    }
   }
 
 }

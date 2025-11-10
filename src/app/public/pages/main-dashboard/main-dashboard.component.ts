@@ -21,4 +21,6 @@ import {ProgressChartComponent} from '@app/public/components/progress-chart/prog
 })
 export class MainDashboardComponent {
 
+
+
 }

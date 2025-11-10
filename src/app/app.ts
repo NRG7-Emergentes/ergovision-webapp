@@ -5,7 +5,7 @@ import { DarkModeService } from '@shared/services/darkMode.service';
 import {NavbarComponent} from '@app/public/components/navbar/navbar.component';
 import {FooterComponent} from '@app/public/components/footer/footer.component';
 import {ZardToastComponent} from '@shared/components/toast/toast.component';
-import {AuthService} from '@app/iam/services/auth.service';
+import {AuthService} from '@app/iam/infrastructure/services/auth.service';
 
 @Component({
   selector: 'app-root',

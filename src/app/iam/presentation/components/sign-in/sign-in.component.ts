@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
-import {AuthService} from "@app/iam/services/auth.service";
+import {AuthService} from "@app/iam/infrastructure/services/auth.service";
 import {ZardCardComponent} from '@shared/components/card/card.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {

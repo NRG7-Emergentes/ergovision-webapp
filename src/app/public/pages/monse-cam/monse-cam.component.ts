@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { MonitorCamComponent } from '@app/monitoring/components/monitor-cam/monitor-cam.component';
+import { MonitorCamComponent } from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 
 @Component({
   selector: 'app-monse-cam',

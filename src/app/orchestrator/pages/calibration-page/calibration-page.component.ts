@@ -1,6 +1,6 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {ZardDividerComponent} from '@shared/components/divider/divider.component';
-import {MonitorCamComponent} from '@app/monitoring/components/monitor-cam/monitor-cam.component';
+import {MonitorCamComponent} from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 
 @Component({
@@ -124,7 +124,7 @@ import {ZardButtonComponent} from '@shared/components/button/button.component';
       </div>
 
       <div class="flex gap-4 ">
-        <button z-button zType="outline" zSize="lg"> Go Back </button>
+        <button z-button zType="outline" zSize="lg"> Go to Settings </button>
         <button z-button zSize="lg"> Start Calibration </button>
       </div>
     </div>
@@ -152,5 +152,7 @@ export class CalibrationPageComponent implements OnInit{
       this.cameraAvailable.set(false);
     }
   }
+
+
 
 }
