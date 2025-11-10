@@ -151,7 +151,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
       toast.info(`[${notification.type}] ${notification.title}`, { description: notification.message });
     });
 
-    // 🔹 Al iniciar el monitoreo, mandamos la notificación de "Active"
+    // 🔹 Al iniciar el monitoreo, mandamos la notificación
     this.sendStateNotification('ACTIVE');
   }
 
@@ -205,7 +205,12 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
       doNotDisturb: false
     };
 
-    // 🔹 Enviamos la notificación REST al backend
+    // 🔹 Enviamos vía WebSocket directamente
+    const wsTitle = `Monitoring ${state}`;
+    const wsMessage = notification.message;
+    this.wsService.sendNotification(wsTitle, wsMessage);
+
+    // 🔹 También enviamos vía REST como respaldo
     this.wsService.sendNotificationViaRest(notification).subscribe({
       next: () => {
         console.log(`[Notification] ${state} sent`);

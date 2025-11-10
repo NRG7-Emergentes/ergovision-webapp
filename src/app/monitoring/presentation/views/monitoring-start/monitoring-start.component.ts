@@ -154,6 +154,9 @@ export class MonitoringStartComponent implements OnInit{
       return;
     }
 
+    // 🔹 Enviar notificación de calibración iniciada
+    this.wsService.sendNotification('Calibración iniciada', 'Preparando sistema de calibración');
+
     this.router.navigate(['/calibration']);
   }
 
@@ -162,6 +165,9 @@ export class MonitoringStartComponent implements OnInit{
       toast.error('Camera is not available');
       return;
     }
+
+    // 🔹 Enviar notificación al backend vía WebSocket
+    this.wsService.sendNotification('Sesión iniciada', 'El monitoreo de postura ha comenzado');
 
     this.router.navigate(['/monitoring/active']);
   }
