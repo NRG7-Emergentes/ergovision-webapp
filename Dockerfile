@@ -3,8 +3,7 @@ WORKDIR /src
 RUN npm install -g pnpm @angular/cli
 
 COPY package.json pnpm-lock.yaml ./
-COPY vendor ./vendor
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 COPY . ./
 RUN ng build --configuration=production
