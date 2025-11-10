@@ -30,7 +30,8 @@
               }
             ],
             "scripts": [
-              "node_modules/apexcharts/dist/apexcharts.min.js"
+              "node_modules/apexcharts/dist/apexcharts.min.js",
+              "src/global-shim.js"
             ],
             "styles": [
               "src/styles.css"
