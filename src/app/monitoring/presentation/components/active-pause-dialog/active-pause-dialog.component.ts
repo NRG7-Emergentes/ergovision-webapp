@@ -1,6 +1,6 @@
-import {Component, inject} from '@angular/core';
-import {Z_MODAL_DATA} from '@shared/components/dialog/dialog.service';
+import {Component, computed, inject, Signal} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
+import {Z_MODAL_DATA} from '@shared/components/dialog/dialog.service';
 
 
 @Component({
@@ -19,12 +19,12 @@ import {NgOptimizedImage} from '@angular/common';
         <div
           class="bg-card border p-6 rounded-lg shadow-sm text-card-foreground w-full flex justify-between items-center">
           <h2 class="text-xl font-bold text-foreground -tracking-normal">Pause Time: </h2>
-          <span class="text-xl font-bold text-foreground  -tracking-normal"> 00:05:42 </span>
+          <span class="text-xl font-bold text-foreground  -tracking-normal"> {{ formattedPauseTime() }} </span>
         </div>
         <div
           class="bg-card border p-6 rounded-lg shadow-sm text-card-foreground w-full flex justify-between items-center">
           <h2 class="text-xl font-bold text-foreground  -tracking-normal">Pauses Taken: </h2>
-          <span class="text-xl font-bold text-foreground  -tracking-normal"> 3 </span>
+          <span class="text-xl font-bold text-foreground  -tracking-normal"> {{ pauseData.pausesTaken() }} </span>
         </div>
       </div>
 
@@ -36,7 +36,7 @@ import {NgOptimizedImage} from '@angular/common';
       <div class="grid grid-cols-3 gap-4 ">
         <div class="bg-card rounded-2xl p-4 overflow-hidden flex flex-col">
           <div class="w-full h-48 flex items-center justify-center bg-muted/20 rounded-lg mb-3">
-            <img ngSrc="/assets/calf.webp" alt="Calf exercise" width="170" height="100" class="object-contain max-w-full max-h-full">
+            <img ngSrc="/assets/calf.webp" alt="Calf exercise" width="192" height="192" class="object-contain max-w-full max-h-full">
           </div>
           <h3 class="text-lg font-semibold text-foreground mb-1">Calf Raises</h3>
           <p class="text-sm text-muted-foreground">Stand and raise your heels off the ground, then lower them back down. Repeat 15 times.</p>
@@ -44,7 +44,7 @@ import {NgOptimizedImage} from '@angular/common';
 
         <div class="bg-card rounded-2xl p-4 overflow-hidden flex flex-col">
           <div class="w-full h-48 flex items-center justify-center bg-muted/20 rounded-lg mb-3">
-            <img ngSrc="/assets/cuadriceps.webp" alt="Quadriceps exercise" width="170" height="200" class="object-contain max-w-full max-h-full">
+            <img ngSrc="/assets/cuadriceps.webp" alt="Quadriceps exercise" width="192" height="192" class="object-contain max-w-full max-h-full">
           </div>
           <h3 class="text-lg font-semibold text-foreground mb-1">Quadriceps Stretch</h3>
           <p class="text-sm text-muted-foreground">Stand on one leg, pull your other foot toward your glutes. Hold for 30 seconds each side.</p>
@@ -52,7 +52,7 @@ import {NgOptimizedImage} from '@angular/common';
 
         <div class="bg-card rounded-2xl p-4 overflow-hidden flex flex-col">
           <div class="w-full h-48 flex items-center justify-center bg-muted/20 rounded-lg mb-3">
-            <img ngSrc="/assets/walk.webp" alt="Walk exercise" width="100" height="100" class="object-contain max-w-full max-h-full">
+            <img ngSrc="/assets/walk.webp" alt="Walk exercise" width="114" height="192" class="object-contain max-w-full max-h-full">
           </div>
           <h3 class="text-lg font-semibold text-foreground mb-1">Walk Around</h3>
           <p class="text-sm text-muted-foreground">Take a short walk around your workspace to improve circulation and reduce stiffness.</p>
@@ -65,7 +65,18 @@ import {NgOptimizedImage} from '@angular/common';
   styles: ``,
 })
 export class ActivePauseDialogComponent {
+  protected readonly pauseData = inject<{
+    pauseTime: Signal<number>;
+    pausesTaken: Signal<number>;
+  }>(Z_MODAL_DATA);
 
-  private zData = inject(Z_MODAL_DATA);
+  // Computed signal to format pause time
+  protected readonly formattedPauseTime = computed(() => {
+    const seconds = this.pauseData.pauseTime();
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
 
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  });
 }
