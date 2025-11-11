@@ -6,11 +6,7 @@ import { ErgovisionLogoComponent } from '@shared/components/ergovision-logo/ergo
 import { ZardCardComponent } from '@shared/components/card/card.component';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { ZardCheckboxComponent } from '@shared/components/checkbox/checkbox.component';
-import {
-  ZardFormControlComponent,
-  ZardFormFieldComponent,
-  ZardFormLabelComponent
-} from '@shared/components/form/form.component';
+import {ZardFormControlComponent, ZardFormFieldComponent, ZardFormLabelComponent} from '@shared/components/form/form.component';
 import { ZardInputDirective } from '@shared/components/input/input.directive';
 import { BaseFormComponent } from '@shared/components/base-form.component';
 import { AuthService } from '@app/iam/services/auth.service';
@@ -24,19 +20,7 @@ type RoleOption = {
 
 @Component({
   selector: 'app-sign-up',
-  imports: [
-    CommonModule,
-    RouterModule,
-    ReactiveFormsModule,
-    ErgovisionLogoComponent,
-    ZardCardComponent,
-    ZardButtonComponent,
-    ZardCheckboxComponent,
-    ZardFormControlComponent,
-    ZardFormFieldComponent,
-    ZardFormLabelComponent,
-    ZardInputDirective
-  ],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, ErgovisionLogoComponent, ZardCardComponent, ZardButtonComponent, ZardCheckboxComponent, ZardFormControlComponent, ZardFormFieldComponent, ZardFormLabelComponent, ZardInputDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="grid grid-cols-2 min-h-dvh">
@@ -56,6 +40,35 @@ type RoleOption = {
 
           <z-card class="p-4 sm:p-6 lg:p-8">
             <form [formGroup]="form" class="space-y-4 sm:space-y-6" (ngSubmit)="onSubmit()">
+
+              <!-- Información Personal -->
+              <div class="grid grid-cols-2 gap-4">
+                <z-form-field>
+                  <z-form-label [zRequired]="true">Name</z-form-label>
+                  <z-form-control>
+                    <input z-input type="text" formControlName="name" placeholder="John" class="w-full"/>
+                  </z-form-control>
+                  @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                    <div class="text-red-500 text-sm mt-1">
+                      <span>Name is required</span>
+                    </div>
+                  }
+                </z-form-field>
+
+                <z-form-field>
+                  <z-form-label [zRequired]="true">Last Name</z-form-label>
+                  <z-form-control>
+                    <input z-input type="text" formControlName="lastName" placeholder="Doe" class="w-full"/>
+                  </z-form-control>
+                  @if (form.get('lastName')?.invalid && form.get('lastName')?.touched) {
+                    <div class="text-red-500 text-sm mt-1">
+                      <span>Last name is required</span>
+                    </div>
+                  }
+                </z-form-field>
+              </div>
+
+              <!-- Credenciales -->
               <z-form-field>
                 <z-form-label [zRequired]="true">Email</z-form-label>
                 <z-form-control>
@@ -72,38 +85,6 @@ type RoleOption = {
                   </div>
                 }
               </z-form-field>
-
-              <div class="grid grid-cols-2 gap-4">
-                <z-form-field>
-                  <z-form-label>Image Url (Optional)</z-form-label>
-                  <z-form-control>
-                    <input z-input type="url" formControlName="img" placeholder="https://img.com/image.webp" class="w-full"/>
-                  </z-form-control>
-                </z-form-field>
-
-                <z-form-field>
-                  <z-form-label>Age (Optional)</z-form-label>
-                  <z-form-control>
-                    <input z-input type="number" formControlName="age" placeholder="19" class="w-full" min="1" max="120"/>
-                  </z-form-control>
-                </z-form-field>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <z-form-field>
-                  <z-form-label>Height (Optional)</z-form-label>
-                  <z-form-control>
-                    <input z-input type="text" formControlName="height" placeholder="in cm" class="w-full"/>
-                  </z-form-control>
-                </z-form-field>
-
-                <z-form-field>
-                  <z-form-label>Weight (Optional)</z-form-label>
-                  <z-form-control>
-                    <input z-input type="text" formControlName="weight" placeholder="in kg" class="w-full"/>
-                  </z-form-control>
-                </z-form-field>
-              </div>
 
               <z-form-field>
                 <z-form-label [zRequired]="true">Password</z-form-label>
@@ -122,23 +103,58 @@ type RoleOption = {
                 }
               </z-form-field>
 
+              <div class="grid grid-cols-3 gap-4">
+                <z-form-field>
+                  <z-form-label>Age</z-form-label>
+                  <z-form-control>
+                    <input z-input type="number" formControlName="age" placeholder="25" class="w-full" min="0" max="120"/>
+                  </z-form-control>
+                  @if (form.get('age')?.invalid && form.get('age')?.touched) {
+                    <div class="text-red-500 text-sm mt-1">
+                      @if (form.get('age')?.errors?.['min']) {
+                        <span>Age must be positive</span>
+                      }
+                    </div>
+                  }
+                </z-form-field>
+
+                <z-form-field>
+                  <z-form-label>Height (cm)</z-form-label>
+                  <z-form-control>
+                    <input z-input type="number" formControlName="height" placeholder="175" class="w-full" step="0.1" min="0"/>
+                  </z-form-control>
+                  @if (form.get('height')?.invalid && form.get('height')?.touched) {
+                    <div class="text-red-500 text-sm mt-1">
+                      @if (form.get('height')?.errors?.['min']) {
+                        <span>Height must be positive</span>
+                      }
+                    </div>
+                  }
+                </z-form-field>
+
+                <z-form-field>
+                  <z-form-label>Weight (kg)</z-form-label>
+                  <z-form-control>
+                    <input z-input type="number" formControlName="weight" placeholder="70" class="w-full" step="0.1" min="0"/>
+                  </z-form-control>
+                  @if (form.get('weight')?.invalid && form.get('weight')?.touched) {
+                    <div class="text-red-500 text-sm mt-1">
+                      @if (form.get('weight')?.errors?.['min']) {
+                        <span>Weight must be positive</span>
+                      }
+                    </div>
+                  }
+                </z-form-field>
+              </div>
+
               <z-form-field>
-                <z-form-label [zRequired]="true">Select your role</z-form-label>
+                <z-form-label>Image URL</z-form-label>
                 <z-form-control>
-                  <select z-input formControlName="selectedRole" class="w-full">
-                    <option value="" disabled>Choose a role</option>
-                    @for (role of roles(); track role.value) {
-                      <option [value]="role.value">{{ role.label }} - {{ role.description }}</option>
-                    }
-                  </select>
+                  <input z-input type="url" formControlName="imageUrl" class="w-full"/>
                 </z-form-control>
-                @if (form.get('selectedRole')?.invalid && form.get('selectedRole')?.touched) {
-                  <div class="text-red-500 text-sm mt-1">
-                    <span>Please select a role</span>
-                  </div>
-                }
               </z-form-field>
 
+              <!-- Términos y Condiciones -->
               <div class="flex items-center gap-2">
                 <z-checkbox id="terms" formControlName="terms"></z-checkbox>
                 <label for="terms" class="text-sm cursor-pointer select-none">Accept terms and conditions</label>
@@ -149,6 +165,7 @@ type RoleOption = {
                 </div>
               }
 
+              <!-- Botón de Submit -->
               <button
                 type="submit"
                 z-button
@@ -181,18 +198,6 @@ type RoleOption = {
   styles: ``
 })
 export class SignUpComponent extends BaseFormComponent implements OnInit {
-  roles = signal<RoleOption[]>([
-    {
-      value: 'ROLE_ADMIN',
-      label: 'PROFESIONAL',
-      description: 'Health professional or ergonomics expert'
-    },
-    {
-      value: 'ROLE_USER',
-      label: 'ESTUDIANTE',
-      description: 'Student learning about ergonomics'
-    }
-  ]);
 
   form!: FormGroup;
   submitted = false;
@@ -206,11 +211,13 @@ export class SignUpComponent extends BaseFormComponent implements OnInit {
     this.form = this.builder.group({
       username: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      img: [''],
-      age: [''],
-      height: [''],
-      weight: [''],
-      selectedRole: ['', Validators.required],
+      name: ['', Validators.required],
+      lastName: ['', Validators.required],
+      age: [null, [Validators.min(0)]],
+      height: [null, [Validators.min(0)]],
+      weight: [null, [Validators.min(0)]],
+      imageUrl: [''],
+      selectedRole: ['ROLE_USER', Validators.required],
       terms: [false, Validators.requiredTrue]
     });
   }
@@ -227,7 +234,13 @@ export class SignUpComponent extends BaseFormComponent implements OnInit {
     const signUpRequest = new SignUpRequest(
       formValue.username,
       formValue.password,
-      [formValue.selectedRole]
+      [formValue.selectedRole],
+      formValue.name,
+      formValue.lastName,
+      formValue.age,
+      formValue.height,
+      formValue.weight,
+      formValue.imageUrl
     );
 
     this.authenticationService.signUp(signUpRequest);
