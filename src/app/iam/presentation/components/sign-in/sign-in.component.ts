@@ -30,26 +30,39 @@ import {SignInRequest} from '@app/iam/domain/model/sign-in.request';
         </div>
       </div>
 
-      <div class=" flex items-center justify-center p-8 bg-background">
+      <div class="flex items-center justify-center p-8 bg-background">
         <div class="w-full max-w-md space-y-8">
           <div class="text-center">
             <h1 class="text-2xl font-bold sm:text-3xl">Sign In</h1>
             <p class="mt-2 text-sm text-muted-foreground sm:text-base">Sign in to your account to continue</p>
           </div>
-          <z-card class="p-4 sm:p-6 lg:p-8 ">
-            <form [formGroup]="form" class="space-y-4 sm:space-y-6 ">
+
+          <z-card class="p-4 sm:p-6 lg:p-8">
+            <form [formGroup]="form" class="space-y-4 sm:space-y-6">
+              <!-- Campo Email -->
               <z-form-field>
-                <z-form-label [zRequired]="true">Email</z-form-label>
+                <z-form-label [zRequired]="true" for="email">Email</z-form-label>
                 <z-form-control>
-                  <input id="email" z-input type="email" formControlName="username" placeholder="name@zard.com" class="w-full"/>
+                  <input id="email" z-input type="email" formControlName="username" placeholder="email@gmail.com" class="w-full" [class.border-destructive]="form.get('username')?.invalid && form.get('username')?.touched" (focus)="onInputFocus('username')" (blur)="onInputBlur('username')" />
                 </z-form-control>
+                @if (form.get('username')?.invalid && form.get('username')?.touched) {
+                  <div class="text-destructive text-sm mt-1">
+                    <span>Email is required</span>
+                  </div>
+                }
               </z-form-field>
 
+              <!-- Campo Password -->
               <z-form-field>
-                <z-form-label [zRequired]="true">Password</z-form-label>
+                <z-form-label [zRequired]="true" for="password">Password</z-form-label>
                 <z-form-control>
-                  <input id="password" z-input type="password" formControlName="password" placeholder="••••••••" class="w-full"/>
+                  <input id="password" z-input type="password" formControlName="password" placeholder="••••••••" class="w-full" [class.border-destructive]="form.get('password')?.invalid && form.get('password')?.touched" (focus)="onInputFocus('password')" (blur)="onInputBlur('password')" />
                 </z-form-control>
+                @if (form.get('password')?.invalid && form.get('password')?.touched) {
+                  <div class="text-destructive text-sm mt-1">
+                    <span>Password is required</span>
+                  </div>
+                }
               </z-form-field>
 
               <div class="flex items-center gap-2">
@@ -57,7 +70,7 @@ import {SignInRequest} from '@app/iam/domain/model/sign-in.request';
                 <label for="remember" class="text-sm cursor-pointer select-none">Remember me for 30 days</label>
               </div>
 
-              <button type="submit" z-button zFull (click)="onSubmit()">Sign in</button>
+              <button type="submit" z-button zFull (click)="onSubmit()" [disabled]="form.invalid" class="transition-all duration-200">Sign in</button>
             </form>
           </z-card>
 
@@ -65,36 +78,48 @@ import {SignInRequest} from '@app/iam/domain/model/sign-in.request';
             Don't have an account?
             <a z-button zType="link" href="/sign-up" class="px-0">Sign up</a>
           </p>
-
         </div>
       </div>
-
-
     </div>
   `,
   styles: ``
 })
-
-///this.router.navigate(['/dashboard', '123']);
-export class SignInComponent extends BaseFormComponent implements OnInit{
+export class SignInComponent extends BaseFormComponent implements OnInit {
   form!: FormGroup;
   submitted = false;
+  focusedField = signal<string | null>(null);
 
-  constructor(private builder: FormBuilder, private authenticationService: AuthService,
-              private router: Router) {
+  constructor(
+    private builder: FormBuilder,
+    private authenticationService: AuthService,
+    private router: Router
+  ) {
     super();
   }
 
   ngOnInit(): void {
     this.form = this.builder.group({
       username: ['', Validators.required],
-      password: ['', Validators.required]
+      password: ['', Validators.required],
+      rememberMe: [false]
     });
   }
 
+  onInputFocus(fieldName: string): void {
+    this.focusedField.set(fieldName);
+  }
+
+  onInputBlur(fieldName: string): void {
+    this.focusedField.set(null);
+    this.form.get(fieldName)?.markAsTouched();
+  }
+
   onSubmit() {
-    if (this.form.invalid)
+    if (this.form.invalid) {
+      this.markFormGroupTouched(this.form);
       return;
+    }
+
     let username = this.form.value.username;
     let password = this.form.value.password;
     const signInRequest = new SignInRequest(username, password);
@@ -106,5 +131,14 @@ export class SignInComponent extends BaseFormComponent implements OnInit{
     this.router.navigate(['/sign-up']);
   }
 
-
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      } else {
+        control?.markAsTouched();
+      }
+    });
+  }
 }
