@@ -1,10 +1,32 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UserService } from '@app/iam/services/user.service';
+import { SignUpResponse } from '@app/iam/domain/model/sign-up.response';
+import { UpdateUserRequest } from '@app/iam/domain/model/update-user.request';
+
+import { ZardCardComponent } from '@shared/components/card/card.component';
+import { ZardButtonComponent } from '@shared/components/button/button.component';
+import { ZardInputDirective } from '@shared/components/input/input.directive';
+import {
+  ZardFormControlComponent,
+  ZardFormFieldComponent,
+  ZardFormLabelComponent
+} from '@shared/components/form/form.component';
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ZardCardComponent,
+    ZardButtonComponent,
+    ZardInputDirective,
+    ZardFormControlComponent,
+    ZardFormFieldComponent,
+    ZardFormLabelComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div class="mb-8">
@@ -12,158 +34,185 @@ import { FormsModule } from '@angular/forms';
         <p class="text-muted-foreground mt-2">Manage your personal information</p>
       </div>
 
-      <div class="bg-card rounded-xl border border-border shadow-lg overflow-hidden">
-        <div class="p-6">
-
+      @if (user()) {
+        <z-card class="p-6">
           <div class="flex items-center justify-between mb-6">
-            <!--El Avatar-->
             <div class="flex items-center gap-4">
               <div class="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground text-xl font-bold border-2 border-sidebar-border">
-                {{ user.name.charAt(0) }}{{ user.lastName.charAt(0) }}
+                {{ user()!.name.charAt(0) }}{{ user()!.lastName.charAt(0) }}
               </div>
               <div>
-                <h2 class="text-xl font-bold text-card-foreground">{{ user.name }} {{ user.lastName }}</h2>
-                <p class="text-sm text-muted-foreground">Age: {{ user.age }} years old</p>
+                <h2 class="text-xl font-bold text-card-foreground">{{ user()!.name }} {{ user()!.lastName }}</h2>
+                <p class="text-sm text-muted-foreground">Age: {{ user()!.age }} years old</p>
               </div>
             </div>
 
-            <!--Bonton de Editar-->
-            <button (click)="toggleEdit()"
-                    class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
-              {{ isEditing ? 'Cancel' : 'Edit Profile' }}
-            </button>
+            <button z-button zVariant="secondary" (click)="toggleEdit()" [disabled]="isLoading()">{{ isEditing() ? 'Cancel' : 'Edit Profile' }}</button>
           </div>
 
-          <!--Detalles del perfil-->
-          <div [ngSwitch]="isEditing" class="space-y-4">
-
-            <!--Formulario para editar-->
-            <form *ngSwitchCase="true" (ngSubmit)="saveProfile()" class="space-y-4">
-              <!--Nombre-->
+          @if (isEditing()) {
+            <form (ngSubmit)="saveProfile()" class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-foreground mb-2">Name</label>
-                  <input type="text" [(ngModel)]="editedUser.name" name="name"
-                         class="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm">
-                </div>
+                <z-form-field>
+                  <z-form-label [zRequired]="true">Name</z-form-label>
+                  <z-form-control>
+                    <input z-input type="text" [(ngModel)]="editedUser.name" name="name" required placeholder="Enter your name">
+                  </z-form-control>
+                </z-form-field>
 
-                <!--Apellido-->
-                <div>
-                  <label class="block text-sm font-medium text-foreground mb-2">Last Name</label>
-                  <input type="text" [(ngModel)]="editedUser.lastName" name="lastName"
-                         class="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm">
-                </div>
+                <z-form-field>
+                  <z-form-label [zRequired]="true">Last Name</z-form-label>
+                  <z-form-control>
+                    <input z-input type="text" [(ngModel)]="editedUser.lastName" name="lastName" required placeholder="Enter your last name">
+                  </z-form-control>
+                </z-form-field>
               </div>
 
-              <!---->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Edad -->
-                <div>
-                  <label class="block text-sm font-medium text-foreground mb-2">Age</label>
-                  <input type="number" [(ngModel)]="editedUser.age" name="age" min="0" max="120"
-                         class="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm">
-                </div>
+                <z-form-field>
+                  <z-form-label [zRequired]="true">Age</z-form-label>
+                  <z-form-control>
+                    <input z-input type="number" [(ngModel)]="editedUser.age" name="age" min="0" max="120" required placeholder="Age">
+                  </z-form-control>
+                </z-form-field>
 
-                <!-- Altura -->
-                <div>
-                  <label class="block text-sm font-medium text-foreground mb-2">Height (cm)</label>
-                  <input type="number" [(ngModel)]="editedUser.height" name="height" min="0" max="250"
-                         class="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm">
-                </div>
+                <z-form-field>
+                  <z-form-label [zRequired]="true">Height (cm)</z-form-label>
+                  <z-form-control>
+                    <input z-input type="number" [(ngModel)]="editedUser.height" name="height" min="0" max="250" required placeholder="Height in cm">
+                  </z-form-control>
+                </z-form-field>
 
-                <!-- Peso -->
-                <div>
-                  <label class="block text-sm font-medium text-foreground mb-2">Weight (kg)</label>
-                  <input type="number" [(ngModel)]="editedUser.weight" name="weight" min="0" max="300" step="0.1"
-                         class="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm">
-                </div>
+                <z-form-field>
+                  <z-form-label [zRequired]="true">Weight (kg)</z-form-label>
+                  <z-form-control>
+                    <input z-input type="number" [(ngModel)]="editedUser.weight" name="weight" min="0" max="300" step="0.1" required placeholder="Weight in kg">
+                  </z-form-control>
+                </z-form-field>
               </div>
 
-              <!-- Form Actions -->
+              <z-form-field>
+                <z-form-label>Image URL</z-form-label>
+                <z-form-control>
+                  <input z-input type="url" [(ngModel)]="editedUser.imageUrl" name="imageUrl" placeholder="https://example.com/photo.jpg">
+                </z-form-control>
+              </z-form-field>
+
               <div class="flex gap-3 justify-end pt-4">
-                <button type="button" (click)="cancelEdit()"
-                        class="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors text-sm">
-                  Cancel
-                </button>
-                <button type="submit"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm">
-                  Save Changes
-                </button>
+                <button type="button" z-button zVariant="outline" (click)="cancelEdit()" [disabled]="isLoading()">Cancel</button>
+                <button type="submit" z-button [disabled]="isLoading()">{{ isLoading() ? 'Saving...' : 'Save Changes' }}</button>
               </div>
             </form>
-
-
-            <div *ngSwitchCase="false" class="space-y-4">
-              <!-- Información Personal -->
-              <div class="bg-sidebar rounded-lg p-4">
-                <h3 class="text-lg font-semibold text-sidebar-foreground mb-3  flex items-center gap-2">
+          } @else {
+            <div class="space-y-6">
+              <z-card class="bg-sidebar rounded-lg p-6 border border-border">
+                <h3 class="text-lg font-semibold text-sidebar-foreground mb-4 flex items-center gap-2">
                   <div class="aspect-square w-5 h-5 flex justify-center items-center">
-                    <i class="icon-user  "></i>
+                    <i class="icon-user"></i>
                   </div>
                   Personal Information
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <!-- Nombre Completo-->
-                  <div class="space-y-1">
-                    <label class="text-sm text-muted-foreground">Full Name</label>
-                    <p class="text-foreground font-medium">{{ user.name }} {{ user.lastName }}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <z-form-label>Full Name</z-form-label>
+                    <p class="text-foreground font-medium text-base">{{ user()!.name }} {{ user()!.lastName }}</p>
                   </div>
 
-                  <!-- Edad-->
-                  <div class="space-y-1">
-                    <label class="text-sm text-muted-foreground">Age</label>
-                    <p class="text-foreground font-medium">{{ user.age }} years old</p>
+                  <div class="space-y-2">
+                    <z-form-label>Age</z-form-label>
+                    <p class="text-foreground font-medium text-base">{{ user()!.age }} years old</p>
                   </div>
 
-                  <!-- Altura-->
-                  <div class="space-y-1">
-                    <label class="text-sm text-muted-foreground">Height</label>
-                    <p class="text-foreground font-medium">{{ user.height }} cm</p>
+                  <div class="space-y-2">
+                    <z-form-label>Height</z-form-label>
+                    <p class="text-foreground font-medium text-base">{{ user()!.height }} cm</p>
                   </div>
 
-                  <!-- Peso-->
-                  <div class="space-y-1">
-                    <label class="text-sm text-muted-foreground">Weight</label>
-                    <p class="text-foreground font-medium">{{ user.weight }} kg</p>
+                  <div class="space-y-2">
+                    <z-form-label>Weight</z-form-label>
+                    <p class="text-foreground font-medium text-base">{{ user()!.weight }} kg</p>
                   </div>
                 </div>
-              </div>
+              </z-card>
             </div>
-          </div>
+          }
+        </z-card>
+      } @else if (isLoading()) {
+        <div class="flex justify-center items-center py-12">
+          <p class="text-muted-foreground">Loading profile...</p>
         </div>
-      </div>
+      }
     </div>
-  `,
-  styles: ``
+  `
 })
-export class ProfileComponent {
-  user = {
-    name: 'Carlos',
-    lastName: 'García López',
-    age: 28,
-    height: 175,
-    weight: 70.5
+export class ProfileComponent implements OnInit {
+  private userService = inject(UserService);
+
+  user = signal<SignUpResponse | null>(null);
+  isEditing = signal(false);
+  isLoading = signal(false);
+
+  editedUser: UpdateUserRequest = {
+    name: '',
+    lastName: '',
+    age: 0,
+    height: 0,
+    weight: 0,
+    imageUrl: ''
   };
 
-  isEditing = false;
-  editedUser = { ...this.user };
+  ngOnInit(): void {
+    this.loadUserProfile();
+  }
 
-  toggleEdit() {
-    this.isEditing = !this.isEditing;
-    if (this.isEditing) {
-      this.editedUser = { ...this.user };
+  private loadUserProfile(): void {
+    this.isLoading.set(true);
+    this.userService.getUserMe().subscribe({
+      next: (data) => {
+        this.user.set(data);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading profile:', error);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  toggleEdit(): void {
+    this.isEditing.update(editing => !editing);
+    if (this.isEditing()) {
+      const currentUser = this.user();
+      if (currentUser) {
+        this.editedUser = {
+          name: currentUser.name,
+          lastName: currentUser.lastName,
+          age: currentUser.age,
+          height: currentUser.height,
+          weight: currentUser.weight,
+          imageUrl: currentUser.imageUrl
+        };
+      }
     }
   }
 
-  saveProfile() {
-    this.user = { ...this.editedUser };
-    this.isEditing = false;
+  saveProfile(): void {
+    this.isLoading.set(true);
+    this.userService.updateProfile(this.editedUser).subscribe({
+      next: (updatedUser) => {
+        this.user.set(updatedUser);
+        this.isEditing.set(false);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error updating profile:', error);
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  cancelEdit() {
-    this.isEditing = false;
+  cancelEdit(): void {
+    this.isEditing.set(false);
   }
-
-
 }
