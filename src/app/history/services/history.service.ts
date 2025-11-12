@@ -1,65 +1,126 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
-export interface SessionSummary {
-  id: string;
-  date: string;
-  duration: string;
-}
-
-export interface SessionDetail {
-  id: string;
-  date: string;
-  duration: string;
-  posture: {
-    goodPercent: number;
-    badPercent: number;
-    goodTime: string;
-    badTime: string;
-  };
-  pauses: {
-    count: number;
-    avgTime: string;
-  };
-}
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { environment } from '@env/environment';
+import {
+  SessionCreateDto,
+  SessionResponse,
+  SessionSummary,
+  SessionDetail
+} from '@app/history/models/session.model';
 
 @Injectable({ providedIn: 'root' })
 export class HistoryService {
-  private readonly summaries: SessionSummary[] = [
-    { id: 's1', date: '2025-10-20', duration: '01:30:00' },
-    { id: 's2', date: '2025-10-21', duration: '00:45:30' },
-    { id: 's3', date: '2025-10-22', duration: '02:10:15' }
-  ];
+  private http = inject(HttpClient);
+  private readonly apiUrl = `${environment.apiUrl}/monitoringSession`;
 
-  private readonly details: Record<string, SessionDetail> = {
-    s1: {
-      id: 's1',
-      date: '2025-10-20',
-      duration: '01:30:00',
-      posture: { goodPercent: 80, badPercent: 20, goodTime: '01:12:00', badTime: '00:18:00' },
-      pauses: { count: 3, avgTime: '00:03:30' }
-    },
-    s2: {
-      id: 's2',
-      date: '2025-10-21',
-      duration: '00:45:30',
-      posture: { goodPercent: 65, badPercent: 35, goodTime: '00:29:30', badTime: '00:16:00' },
-      pauses: { count: 1, avgTime: '00:05:00' }
-    },
-    s3: {
-      id: 's3',
-      date: '2025-10-22',
-      duration: '02:10:15',
-      posture: { goodPercent: 90, badPercent: 10, goodTime: '01:57:08', badTime: '00:13:07' },
-      pauses: { count: 5, avgTime: '00:02:40' }
-    }
-  };
-
+  /**
+   * Get all sessions for the current user
+   */
   listSessions(): Observable<SessionSummary[]> {
-    return of(this.summaries);
+    const url = this.apiUrl;
+    console.log('[HistoryService] GET request to:', url);
+    
+    return this.http.get<SessionResponse[]>(url).pipe(
+      map(sessions => {
+        console.log('[HistoryService] Raw response from backend:', sessions);
+        const mapped = sessions.map(this.mapToSummary.bind(this));
+        console.log('[HistoryService] Mapped sessions:', mapped);
+        return mapped;
+      })
+    );
   }
 
+  /**
+   * Get detailed information about a specific session
+   */
   getSession(id: string): Observable<SessionDetail | undefined> {
-    return of(this.details[id]);
+    const url = `${this.apiUrl}/${id}`;
+    console.log('[HistoryService] GET request to:', url);
+    
+    return this.http.get<SessionResponse>(url).pipe(
+      map(session => {
+        console.log('[HistoryService] Raw session from backend:', session);
+        const mapped = this.mapToDetail(session);
+        console.log('[HistoryService] Mapped session detail:', mapped);
+        return mapped;
+      })
+    );
+  }
+
+  /**
+   * Create a new monitoring session
+   */
+  createSession(sessionData: SessionCreateDto): Observable<SessionResponse> {
+    const url = this.apiUrl;
+    console.log('[HistoryService] POST request to:', url);
+    console.log('[HistoryService] Request body:', sessionData);
+    
+    return this.http.post<SessionResponse>(url, sessionData);
+  }
+
+  /**
+   * Map API response to SessionSummary for list display
+   */
+  private mapToSummary(session: SessionResponse): SessionSummary {
+    return {
+      id: session.id.toString(),
+      date: this.formatDate(session.startDate),
+      duration: this.secondsToHms(session.duration)
+    };
+  }
+
+  /**
+   * Map API response to SessionDetail for detail display
+   */
+  private mapToDetail(session: SessionResponse): SessionDetail {
+    const totalTime = session.duration;
+    const goodTime = session.goodPostureTime;
+    const badTime = session.badPostureTime;
+
+    // Calculate percentages
+    const activeTime = goodTime + badTime; // total active time (excluding pauses)
+    const goodPercent = activeTime > 0 ? Math.round((goodTime / activeTime) * 100) : 0;
+    const badPercent = activeTime > 0 ? Math.round((badTime / activeTime) * 100) : 0;
+
+    // Calculate total pause time
+    const totalPauseTime = session.numberOfPauses * session.averagePauseDuration;
+
+    return {
+      id: session.id.toString(),
+      date: this.formatDate(session.startDate),
+      duration: this.secondsToHms(totalTime),
+      posture: {
+        goodPercent,
+        badPercent,
+        goodTime: this.secondsToHms(goodTime),
+        badTime: this.secondsToHms(badTime)
+      },
+      pauses: {
+        count: session.numberOfPauses,
+        avgTime: this.secondsToHms(session.averagePauseDuration),
+        totalTime: this.secondsToHms(totalPauseTime)
+      }
+    };
+  }
+
+  /**
+   * Format ISO date string to readable format (YYYY-MM-DD)
+   */
+  private formatDate(isoDate: string): string {
+    const date = new Date(isoDate);
+    return date.toISOString().split('T')[0];
+  }
+
+  /**
+   * Convert seconds to HH:MM:SS format
+   */
+  private secondsToHms(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 }

@@ -11,6 +11,8 @@ import {
 } from '@app/monitoring/presentation/components/active-pause-dialog/active-pause-dialog.component';
 import type {PoseLandmarkerResult} from '@mediapipe/tasks-vision';
 import {toast} from 'ngx-sonner';
+import {MonitoringSessionService} from '@app/monitoring/services/monitoring-session.service';
+import {AuthService} from '@app/iam/infrastructure/services/auth.service';
 
 @Component({
   selector: 'app-monitoring-active',
@@ -139,6 +141,8 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
 
   private router = inject(Router);
   private dialogService = inject(ZardDialogService);
+  private sessionService = inject(MonitoringSessionService);
+  private authService = inject(AuthService);
 
   // Pause timer
   private pauseTimerInterval: number | undefined;
@@ -153,6 +157,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   // Timers
   private monitoringInterval: number | undefined;
   private badPostureInterval: number | undefined;
+  private goodPostureInterval: number | undefined;
 
   // Bad posture detection
   private badPostureStartTime: number | null = null;
@@ -171,6 +176,9 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     this.beepAudio = new Audio('/assets/beep.opus');
     this.beepAudio.load();
 
+    // Start monitoring session
+    this.sessionService.startSession();
+
     // Start monitoring timer (only increments when not paused)
     this.monitoringInterval = window.setInterval(() => {
       if (!this.isPaused()) {
@@ -188,6 +196,10 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     if (this.badPostureInterval !== undefined) {
       clearInterval(this.badPostureInterval);
       this.badPostureInterval = undefined;
+    }
+    if (this.goodPostureInterval !== undefined) {
+      clearInterval(this.goodPostureInterval);
+      this.goodPostureInterval = undefined;
     }
     if (this.pauseTimerInterval !== undefined) {
       clearInterval(this.pauseTimerInterval);
@@ -272,6 +284,11 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
       if (this.badPostureInterval === undefined) {
         this.badPostureInterval = window.setInterval(() => {
           this.badPostureTime.set(this.badPostureTime() + 1);
+          
+          // Update session bad posture time (in seconds)
+          this.sessionService.updateSessionData({
+            badPostureTime: this.badPostureTime()
+          });
         }, 1000);
       }
 
@@ -311,6 +328,18 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
         clearInterval(this.badPostureInterval);
         this.badPostureInterval = undefined;
       }
+
+      // Start good posture time increment (when not paused and good posture)
+      if (this.goodPostureInterval === undefined && !this.isPaused()) {
+        this.goodPostureInterval = window.setInterval(() => {
+          if (!this.isPaused()) {
+            const goodTime = this.monitoringTime() - this.badPostureTime();
+            this.sessionService.updateSessionData({
+              goodPostureTime: goodTime
+            });
+          }
+        }, 1000);
+      }
     }
   }
 
@@ -323,7 +352,65 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   }
 
   onFinishSession(){
-    this.router.navigate(['/history']);
+    // Get user ID from auth service (not needed anymore but keep for logging)
+    const userId = this.authService.getToken();
+    
+    console.log('=== FINISH SESSION DEBUG ===');
+    console.log('User ID:', userId);
+    console.log('Is authenticated:', this.authService.isAuthenticated());
+    
+    // Calculate final good posture time (in seconds)
+    const finalGoodTime = this.monitoringTime() - this.badPostureTime();
+    this.sessionService.updateSessionData({
+      goodPostureTime: finalGoodTime
+    });
+
+    // Get session data for logging
+    const sessionData = this.sessionService.getSessionData();
+    console.log('Session data to save:', {
+      startDate: sessionData.startDate,
+      duration: this.monitoringTime(),
+      goodPostureTime: sessionData.goodPostureTime,
+      badPostureTime: sessionData.badPostureTime,
+      numberOfPauses: sessionData.numberOfPauses,
+      totalPauseTime: sessionData.totalPauseTime
+    });
+
+    // Save session to backend
+    console.log('Attempting to save session to backend...');
+    this.sessionService.saveSession().subscribe({
+      next: (response) => {
+        console.log('✅ Session saved successfully:', response);
+        toast.success('Session saved successfully!');
+        this.router.navigate(['/history']);
+      },
+      error: (error) => {
+        console.error('❌ Error saving session:', error);
+        console.error('Error details:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          url: error.url
+        });
+        
+        // Show detailed error to user
+        let errorMessage = 'Failed to save session.';
+        if (error.status === 0) {
+          errorMessage = 'Cannot connect to backend. Is the server running on http://localhost:8080?';
+        } else if (error.status === 404) {
+          errorMessage = 'Monitoring session endpoint not found. Check backend /api/v1/monitoringSession.';
+        } else if (error.status >= 500) {
+          errorMessage = 'Server error. Please check backend logs.';
+        } else if (error.status === 400) {
+          errorMessage = 'Invalid session data. Check request format.';
+        }
+        
+        toast.error(errorMessage);
+        
+        // Navigate to history anyway (user can still see old sessions)
+        this.router.navigate(['/history']);
+      }
+    });
   }
 
   onPauseInit(){
@@ -332,6 +419,9 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
 
     // Increment pauses taken
     this.pausesTaken.set(this.pausesTaken() + 1);
+    
+    // Update session service
+    this.sessionService.incrementPauseCount();
 
     // Reset pause time for this pause
     this.pauseTime.set(0);
@@ -359,11 +449,17 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   }
 
   private onPauseFinish(): void {
+    // Calculate total pause duration from this pause (in seconds)
+    const currentPauseDuration = this.pauseTime();
+    
     // Stop pause timer
     if (this.pauseTimerInterval !== undefined) {
       clearInterval(this.pauseTimerInterval);
       this.pauseTimerInterval = undefined;
     }
+
+    // Update session service with accumulated pause time (in seconds)
+    this.sessionService.addPauseDuration(currentPauseDuration);
 
     // Resume monitoring
     this.isPaused.set(false);

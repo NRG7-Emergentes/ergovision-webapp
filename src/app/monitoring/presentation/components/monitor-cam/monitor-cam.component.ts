@@ -37,6 +37,7 @@ export class MonitorCamComponent {
   private canvasCtx: CanvasRenderingContext2D | null = null;
   private mediaStream: MediaStream | undefined;
   private onLoadedData: (() => void) | undefined;
+  private isDestroyed = false;
 
   async ngAfterViewInit(): Promise<void> {
     try {
@@ -63,6 +64,9 @@ export class MonitorCamComponent {
   }
 
   ngOnDestroy(): void {
+    // Mark component as destroyed to prevent further emissions
+    this.isDestroyed = true;
+
     if (this.detectionIntervalId !== undefined) {
       clearInterval(this.detectionIntervalId);
       this.detectionIntervalId = undefined;
@@ -92,7 +96,10 @@ export class MonitorCamComponent {
     if (!this.poseLandmarker || !this.canvasCtx || !this.drawingUtils) return;
 
     this.detectionIntervalId = window.setInterval(() => {
-      if (!this.poseLandmarker || !this.canvasCtx || !this.drawingUtils) return;
+      // Guard against post-destruction execution
+      if (this.isDestroyed || !this.poseLandmarker || !this.canvasCtx || !this.drawingUtils) {
+        return;
+      }
 
       const results = this.poseLandmarker.detectForVideo(video, performance.now());
 
@@ -115,8 +122,10 @@ export class MonitorCamComponent {
 
       this.canvasCtx!.restore();
 
-      // Emit results to parent
-      this.postureResults.emit(results);
+      // Emit results to parent only if component is still alive
+      if (!this.isDestroyed) {
+        this.postureResults.emit(results);
+      }
     }, 1000 / 30);
   }
 
