@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
-import { SessionDetail } from '../../services/history.service';
+import { SessionDetail } from '@app/history/models/session.model';
 
 const MOCK_DETAIL: SessionDetail = {
   id: 'mock',
   date: '2025-10-20',
   duration: '01:00:00',
   posture: { goodPercent: 75, badPercent: 25, goodTime: '00:45:00', badTime: '00:15:00' },
-  pauses: { count: 2, avgTime: '00:04:30' }
+  pauses: { count: 2, avgTime: '00:04:30', totalTime: '00:09:00' }
 };
 
 @Component({

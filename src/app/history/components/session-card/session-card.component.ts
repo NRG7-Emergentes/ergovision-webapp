@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output } from '@angular/core';
-import { SessionSummary } from '../../services/history.service';
+import { SessionSummary } from '@app/history/models/session.model';
 import {UpperCasePipe} from '@angular/common';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 
