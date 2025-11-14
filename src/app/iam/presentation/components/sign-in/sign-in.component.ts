@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
-import {AuthService} from "@app/iam/infrastructure/services/auth.service";
+import {AuthenticationService} from "@app/iam/services/authentication.service";
+import {SignInRequest} from '@app/iam/domain/model/sign-in.request';
 import {ZardCardComponent} from '@shared/components/card/card.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {
@@ -12,6 +13,7 @@ import {
   ZardFormLabelComponent
 } from '@shared/components/form/form.component';
 import {ZardInputDirective} from '@shared/components/input/input.directive';
+import {toast} from 'ngx-sonner';
 
 @Component({
   selector: 'app-sign-in',
@@ -71,7 +73,7 @@ import {ZardInputDirective} from '@shared/components/input/input.directive';
 })
 export class SignInComponent {
 
-  protected readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthenticationService);
   private router = inject(Router);
   protected readonly isLoading = signal(false);
 
@@ -81,22 +83,35 @@ export class SignInComponent {
   });
 
   onSubmit() {
-    this.isLoading.set(true);
-
     if (this.loginForm.invalid){
       this.loginForm.markAllAsTouched();
       this.loginForm.updateValueAndValidity();
-      this.isLoading.set(false);
       return;
     }
 
-    this.authService.login();
+    this.isLoading.set(true);
 
-    if ( this.authService.isAuthenticated()){
-      this.router.navigate(['/dashboard', '123']);
-    }
+    const signInRequest = new SignInRequest(
+      this.loginForm.value.email!,
+      this.loginForm.value.password!
+    );
 
-    this.isLoading.set(false);
+    this.authService.signIn(signInRequest).subscribe({
+      next: (response) => {
+
+        toast.success('Sign-in successful');
+        this.isLoading.set(false);
+        // Navigation is handled by the service
+      },
+      error: (error) => {
+        toast.error('Sign-in failed', {
+          description: error.error.message
+        })
+
+        this.isLoading.set(false);
+
+      }
+    });
   }
 
 }
