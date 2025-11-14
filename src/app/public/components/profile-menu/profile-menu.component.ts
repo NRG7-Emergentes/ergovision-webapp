@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import {ZardDropdownModule} from '@shared/components/dropdown/dropdown.module';
 import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
 import { Router } from '@angular/router';
-import {AuthService} from '@app/iam/infrastructure/services/auth.service';
+import {AuthenticationService} from '@app/iam/services/authentication.service';
 
 @Component({
   selector: 'app-profile-menu',
@@ -40,7 +40,7 @@ import {AuthService} from '@app/iam/infrastructure/services/auth.service';
 })
 export class ProfileMenuComponent {
   private router = inject(Router);
-  private readonly authService = inject(AuthService);
+  private readonly authService = inject(AuthenticationService);
 
   logOut() {
     this.authService.logout();

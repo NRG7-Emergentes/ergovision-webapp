@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthenticationService } from '@app/iam/services/authentication.service';
 
 export const rootRedirectGuard: CanActivateFn = () => {
-  const authService = inject(AuthService);
+  const authService = inject(AuthenticationService);
   const router = inject(Router);
 
   if (authService.isAuthenticated()) {
