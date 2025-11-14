@@ -38,9 +38,9 @@ import {toast} from 'ngx-sonner';
           <z-card class="p-4 sm:p-6 lg:p-8 ">
             <form [formGroup]="loginForm" class="space-y-4 sm:space-y-6 ">
               <z-form-field>
-                <z-form-label [zRequired]="true">Email</z-form-label>
+                <z-form-label [zRequired]="true">Username</z-form-label>
                 <z-form-control>
-                  <input id="email" z-input type="email" formControlName="email" placeholder="name@zard.com" class="w-full"/>
+                  <input id="username" z-input type="text" formControlName="username" placeholder="ur name" class="w-full"/>
                 </z-form-control>
               </z-form-field>
 
@@ -78,7 +78,7 @@ export class SignInComponent {
   protected readonly isLoading = signal(false);
 
   protected readonly loginForm = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
+    username: new FormControl('', [Validators.required]),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
   });
 
@@ -92,14 +92,14 @@ export class SignInComponent {
     this.isLoading.set(true);
 
     const signInRequest = new SignInRequest(
-      this.loginForm.value.email!,
+      this.loginForm.value.username!,
       this.loginForm.value.password!
     );
 
     this.authService.signIn(signInRequest).subscribe({
       next: (response) => {
 
-        toast.success('Sign-in successful');
+
         this.isLoading.set(false);
         // Navigation is handled by the service
       },

@@ -12,7 +12,7 @@ import {AuthenticationService} from '@app/iam/services/authentication.service';
   imports: [RouterOutlet, NavbarComponent, FooterComponent, ZardToastComponent],
   template: `
     <div class="font-inter ">
-      @if(authService.isAuthenticated()) {
+      @if(authService.isSignedIn()) {
         <div class="grid min-h-dvh grid-rows-[auto_1fr_auto]">
           <app-navbar/>
           <div class="">

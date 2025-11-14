@@ -6,7 +6,7 @@ export const rootRedirectGuard: CanActivateFn = () => {
   const authService = inject(AuthenticationService);
   const router = inject(Router);
 
-  if (authService.isAuthenticated()) {
+  if (authService.isSignedIn()) {
     const userId = authService.getToken();
     return router.createUrlTree(['/dashboard', userId]);
   }

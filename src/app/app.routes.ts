@@ -16,8 +16,8 @@ import {MonitoringActiveComponent} from '@app/monitoring/presentation/views/moni
 
 export const routes: Routes = [
   { path: '', canActivate: [rootRedirectGuard], children: [] },
-  { path: 'dashboard/:id', component: MainDashboardComponent, canActivate: [authenticationGuard] },
-  { path: 'progress/:id', component: StatsPageComponent, canActivate: [authenticationGuard] },
+  { path: 'dashboard', component: MainDashboardComponent, canActivate: [authenticationGuard] },
+  { path: 'progress', component: StatsPageComponent, canActivate: [authenticationGuard] },
   { path: 'monitoring/start', component: MonitoringStartComponent, canActivate: [authenticationGuard] },
   { path: 'monitoring/active', component: MonitoringActiveComponent, canActivate: [authenticationGuard] },
   { path: 'history', component: HistoryPageComponent, canActivate: [authenticationGuard] },

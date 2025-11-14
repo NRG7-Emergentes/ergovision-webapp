@@ -68,6 +68,13 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [
+              "jlcpde-ip-38-25-29-185.tunnelmole.net",
+              "localhost",
+              ".tunnelmole.net"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "ergovision-frontend:build:production"

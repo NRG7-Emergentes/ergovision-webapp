@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {ZardDropdownModule} from '@shared/components/dropdown/dropdown.module';
 import {ZardAvatarComponent} from '@shared/components/avatar/avatar.component';
 import { Router } from '@angular/router';
@@ -12,12 +12,12 @@ import {AuthenticationService} from '@app/iam/services/authentication.service';
       <div
         class="flex items-center gap-4 py-2 px-4 rounded-md hover:bg-accent/50 hover:text-accent-foreground bg-card border p-6 shadow-sm text-card-foreground transition-colors"
         z-dropdown [zDropdownMenu]="menu">
-        <z-avatar [zImage]="{fallback: 'Y'}" class="w-8 h-8"/>
-        Your Name
+        <z-avatar [zSrc]="userImageUrl()?.toString()" zFallback="N/A" class="w-8 h-8"/>
+        {{ username() }}
       </div>
       <z-dropdown-menu-content #menu="zDropdownMenuContent" class="w-56">
         <z-dropdown-menu-label>My Account</z-dropdown-menu-label>
-        <z-dropdown-menu-item (click)="goToProfile()" >
+        <z-dropdown-menu-item (click)="goToProfile()">
           <i class="icon-circle-user ml-1"></i>
           Profile
         </z-dropdown-menu-item>
@@ -39,11 +39,14 @@ import {AuthenticationService} from '@app/iam/services/authentication.service';
   styles: ``
 })
 export class ProfileMenuComponent {
+
   private router = inject(Router);
   private readonly authService = inject(AuthenticationService);
+  protected readonly userImageUrl = this.authService.userImageUrl;
+  protected readonly username = this.authService.username;
 
   logOut() {
-    this.authService.logout();
+    this.authService.signOut();
     this.router.navigate(['sign-in']);
   }
 
