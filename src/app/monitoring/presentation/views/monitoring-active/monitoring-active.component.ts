@@ -206,19 +206,54 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   // Audio
   private beepAudio: HTMLAudioElement | null = null;
 
+  // Toast control
+  private lastToastTime = 0;
+  private readonly TOAST_THROTTLE_MS = 5000;
+  private activeToastId: string | number | undefined;
+  private shownNotifications = new Set<string>();
+
   constructor() {
     // Effect to sync WebSocket connection state
     effect(() => {
       this.wsConnected.set(this.wsService.connected());
     });
 
-    // Effect to listen to WebSocket notifications
+    // Effect to listen to WebSocket notifications (eliminar duplicados y throttle)
     effect(() => {
       const subscription = this.wsService.notifications$.subscribe(notification => {
         if (!notification) return;
-        toast.info(`[${notification.type}] ${notification.title}`, {
-          description: notification.message
-        });
+
+        // Evitar notificaciones duplicadas
+        const notificationKey = `${notification.type}-${notification.title}`;
+        if (this.shownNotifications.has(notificationKey)) {
+          return;
+        }
+
+        // Solo mostrar notificaciones relevantes para monitoreo activo
+        if (!notification.type || !['ACTIVE', 'PAUSED', 'FINALIZED'].includes(notification.type)) {
+          return;
+        }
+
+        // Throttle notifications
+        const now = Date.now();
+        if (now - this.lastToastTime < this.TOAST_THROTTLE_MS) {
+          return;
+        }
+
+        this.lastToastTime = now;
+        this.shownNotifications.add(notificationKey);
+
+        // Limpiar después de 10 segundos
+        setTimeout(() => {
+          this.shownNotifications.delete(notificationKey);
+        }, 10000);
+
+        // Cerrar toast anterior si existe
+        if (this.activeToastId) {
+          toast.dismiss(this.activeToastId);
+        }
+
+        // No mostrar toast aquí, se mostrará en sendStateNotification
       });
 
       return () => subscription.unsubscribe();
@@ -233,6 +268,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.cleanup();
+    this.shownNotifications.clear();
   }
 
   // Public handlers
@@ -281,10 +317,6 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     this.currentState.set('FINALIZED');
     this.sendStateNotification('FINALIZED');
 
-    toast.success('Monitoring session has ended', {
-      description: 'Your session data has been saved'
-    });
-
     setTimeout(() => {
       this.router.navigate(['/history']);
     }, 1000);
@@ -300,7 +332,16 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
         this.sendStateNotification('ACTIVE');
       } else {
         console.error('[MonitoringActive] WebSocket connection failed');
-        toast.error('Failed to connect to notification server');
+
+        // Cerrar toast anterior
+        if (this.activeToastId) {
+          toast.dismiss(this.activeToastId);
+        }
+
+        this.activeToastId = toast.error('Connection failed', {
+          description: 'Unable to connect to notification server',
+          duration: 3000
+        });
       }
     }, 1000);
   }
@@ -412,8 +453,31 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   }
 
   private triggerBadPostureAlert(): void {
+    // Solo mostrar alerta si pasó suficiente tiempo desde la última
+    const now = Date.now();
+    if (now - this.lastToastTime < this.TOAST_THROTTLE_MS) {
+      // Solo reproducir sonido sin toast
+      if (this.soundAlerts() && this.beepAudio) {
+        this.beepAudio.currentTime = 0;
+        this.beepAudio.play().catch(err => {
+          console.error('[Audio] Failed to play beep:', err);
+        });
+      }
+      return;
+    }
+
+    this.lastToastTime = now;
+
     if (this.visualAlerts()) {
-      toast.error('Bad Posture detected');
+      // Cerrar toast anterior
+      if (this.activeToastId) {
+        toast.dismiss(this.activeToastId);
+      }
+
+      this.activeToastId = toast.error('Bad posture detected', {
+        description: 'Please adjust your sitting position',
+        duration: 4000
+      });
     }
 
     if (this.soundAlerts() && this.beepAudio) {
@@ -443,7 +507,16 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   private sendStateNotification(state: MonitoringState): void {
     if (!this.wsService.connected()) {
       console.error('[WebSocket] Not connected - cannot send notification');
-      toast.error('Cannot send notification - not connected to server');
+
+      // Cerrar toast anterior
+      if (this.activeToastId) {
+        toast.dismiss(this.activeToastId);
+      }
+
+      this.activeToastId = toast.error('Connection lost', {
+        description: 'Notification server is unavailable',
+        duration: 3000
+      });
       return;
     }
 
@@ -456,10 +529,24 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
 
   private showStateToast(state: MonitoringState): void {
     const config = this.STATE_NOTIFICATIONS[state];
-    const toastFn = toast[config.toastType];
 
-    toastFn(`✅ ${config.title}`, {
-      description: config.toastDescription
+    // Cerrar toast anterior
+    if (this.activeToastId) {
+      toast.dismiss(this.activeToastId);
+    }
+
+    // Mapear tipo de toast
+    const toastFunctions = {
+      success: toast.success,
+      warning: toast.warning,
+      info: toast.info
+    } as const;
+
+    const toastFn = toastFunctions[config.toastType];
+
+    this.activeToastId = toastFn(config.title, {
+      description: config.toastDescription,
+      duration: state === 'FINALIZED' ? 2000 : 3000
     });
   }
 

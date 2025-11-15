@@ -1,9 +1,10 @@
-import {Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
+import { toast } from 'ngx-sonner';
+
 import { MonitorCamComponent } from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { WebsocketNotificationService } from '@app/notifications/infrastructure/websocket-notification.service';
-import {toast} from 'ngx-sonner';
 
 @Component({
   selector: 'monitoring-start',
@@ -103,34 +104,63 @@ import {toast} from 'ngx-sonner';
   `,
   styles: []
 })
-export class MonitoringStartComponent implements OnInit{
-
+export class MonitoringStartComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly wsService = inject(WebsocketNotificationService);
 
-  protected readonly cameraAvailable = signal(false);
+  readonly cameraAvailable = signal(false);
+
+  private lastNotificationTime = 0;
+  private readonly NOTIFICATION_THROTTLE_MS = 3000;
+  private shownNotifications = new Set<string>();
+
+  constructor() {
+    // Effect to listen to WebSocket notifications (eliminar duplicados)
+    effect(() => {
+      const subscription = this.wsService.notifications$.subscribe(notification => {
+        if (!notification) return;
+
+        // Evitar notificaciones duplicadas
+        const notificationKey = `${notification.title}-${notification.message}`;
+        if (this.shownNotifications.has(notificationKey)) {
+          return;
+        }
+
+        // Throttle notifications
+        const now = Date.now();
+        if (now - this.lastNotificationTime < this.NOTIFICATION_THROTTLE_MS) {
+          return;
+        }
+
+        this.lastNotificationTime = now;
+        this.shownNotifications.add(notificationKey);
+
+        // Limpiar el set después de 5 segundos para permitir notificaciones repetidas
+        setTimeout(() => {
+          this.shownNotifications.delete(notificationKey);
+        }, 5000);
+
+        // Mostrar solo si es relevante para esta vista
+        if (notification.type && !['ACTIVE', 'PAUSED', 'FINALIZED'].includes(notification.type)) {
+          toast.info(notification.title, {
+            description: notification.message,
+            duration: 3000
+          });
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    });
+  }
 
   ngOnInit(): void {
     this.checkCameraAvailability();
+    this.initializeWebSocket();
+  }
 
-    // 🔹 Conectamos el WebSocket cuando arranca la vista
-    this.wsService.connect();
-
-    // 🔹 Esperamos a que se establezca la conexión y mostramos toast
-    setTimeout(() => {
-      if (this.wsService.connected()) {
-        toast.success('✅ Conectado al servidor de notificaciones');
-      } else {
-        toast.error('❌ No se pudo conectar al servidor de notificaciones');
-      }
-    }, 1000);
-
-    // 🔹 Escuchamos notificaciones del backend
-    this.wsService.notifications$.subscribe(notification => {
-      if (notification) {
-        toast.info(`${notification.title}: ${notification.message}`);
-      }
-    });
+  ngOnDestroy(): void {
+    // Limpiar notificaciones mostradas
+    this.shownNotifications.clear();
   }
 
   async checkCameraAvailability(): Promise<void> {
@@ -148,28 +178,47 @@ export class MonitoringStartComponent implements OnInit{
   }
 
   goToCalibration(): void {
-    // 🔹 Verificar conexión antes de navegar
     if (!this.wsService.connected()) {
-      toast.error('❌ No se pudo conectar al servidor de notificaciones');
+      toast.error('Connection unavailable', {
+        description: 'Please check your network connection',
+        duration: 3000
+      });
       return;
     }
 
-    // 🔹 Enviar notificación de calibración iniciada
-    this.wsService.sendNotification('Calibración iniciada', 'Preparando sistema de calibración');
-
+    this.wsService.sendNotification('Calibration started', 'Preparing calibration system');
     this.router.navigate(['/calibration']);
   }
 
   goToActiveMonitoring(): void {
     if (!this.cameraAvailable()) {
-      toast.error('Camera is not available');
+      toast.error('Camera unavailable', {
+        description: 'Please grant camera permissions to continue',
+        duration: 3000
+      });
       return;
     }
 
-    // 🔹 Enviar notificación al backend vía WebSocket
-    this.wsService.sendNotification('Sesión iniciada', 'El monitoreo de postura ha comenzado');
-
+    this.wsService.sendNotification('Session started', 'Posture monitoring has begun');
     this.router.navigate(['/monitoring/active']);
   }
 
+  private initializeWebSocket(): void {
+    this.wsService.connect();
+
+    // Solo mostrar notificación de conexión una vez
+    setTimeout(() => {
+      if (this.wsService.connected()) {
+        toast.success('Connected', {
+          description: 'Notification server is ready',
+          duration: 2000
+        });
+      } else {
+        toast.error('Connection failed', {
+          description: 'Unable to connect to notification server',
+          duration: 3000
+        });
+      }
+    }, 1000);
+  }
 }
