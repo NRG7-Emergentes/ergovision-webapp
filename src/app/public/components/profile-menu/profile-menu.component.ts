@@ -12,7 +12,7 @@ import {AuthenticationService} from '@app/iam/services/authentication.service';
       <div
         class="flex items-center gap-4 py-2 px-4 rounded-md hover:bg-accent/50 hover:text-accent-foreground bg-card border p-6 shadow-sm text-card-foreground transition-colors"
         z-dropdown [zDropdownMenu]="menu">
-        <z-avatar [zSrc]="userImageUrl()?.toString()" zFallback="N/A" class="w-8 h-8"/>
+        <z-avatar [zSrc]="userImageUrl()?.toString()" zFallback="N/A" class="8w-8 h-"/>
         {{ username() }}
       </div>
       <z-dropdown-menu-content #menu="zDropdownMenuContent" class="w-56">

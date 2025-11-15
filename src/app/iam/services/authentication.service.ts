@@ -7,7 +7,6 @@ import { SignUpResponse } from '@app/iam/domain/model/sign-up.response';
 import { SignInRequest } from '@app/iam/domain/model/sign-in.request';
 import { SignInResponse } from '@app/iam/domain/model/sign-in.response';
 import { Observable, tap } from 'rxjs';
-import {toast} from 'ngx-sonner';
 
 @Injectable({
   providedIn: 'root'
@@ -97,7 +96,6 @@ export class AuthenticationService {
       this.httpOptions
     ).pipe(
       tap(response => {
-        console.log('Sign-in successful:', response);
 
         // Update signals
         this.isSignedIn.set(true);
@@ -149,6 +147,19 @@ export class AuthenticationService {
    */
   getToken(): string | null {
     return localStorage.getItem('token');
+  }
+
+  /**
+   * Update user profile data (called after profile update)
+   */
+  updateUserProfile(imageUrl: string, username?: string): void {
+    if (imageUrl) {
+      this.userImageUrl.set(imageUrl);
+    }
+    if (username) {
+      this.username.set(username);
+      localStorage.setItem('username', username);
+    }
   }
 
   /**

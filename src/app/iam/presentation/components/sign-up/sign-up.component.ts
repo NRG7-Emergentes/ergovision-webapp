@@ -38,7 +38,7 @@ import {toast} from 'ngx-sonner';
           </div>
 
           <z-card class="p-4 sm:p-6 lg:p-8">
-            <form [formGroup]="signUpForm" class="space-y-4 sm:space-y-6">
+            <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()" class="space-y-4 sm:space-y-6">
 
               <z-form-field>
                 <z-form-label [zRequired]="true">Username</z-form-label>
@@ -104,8 +104,8 @@ import {toast} from 'ngx-sonner';
                 <label for="terms" class="text-sm cursor-pointer select-none">Accept terms and conditions </label>
               </div>
 
-              <button type="submit" z-button zFull (click)="onSubmit()"
-                      [zLoading]="isLoading()" [disabled]="this.signUpForm.invalid">Sign up</button>
+              <button type="submit" z-button zFull
+                      [zLoading]="isLoading()" >Sign up</button>
             </form>
           </z-card>
 
@@ -151,16 +151,12 @@ export class SignUpComponent {
 
     height: new FormControl('', [
       Validators.required,
-      onlyNumbersValidator(),
-      Validators.min(50),
-      Validators.max(300)
+      onlyNumbersValidator()
     ]),
 
     weight: new FormControl('', [
       Validators.required,
-      onlyNumbersValidator(),
-      Validators.min(1),
-      Validators.max(500)
+      onlyNumbersValidator()
     ]),
 
     password: new FormControl('', [
@@ -175,7 +171,9 @@ export class SignUpComponent {
 
 
   onSubmit() {
+
     if (this.signUpForm.invalid) {
+      toast.error('Form is invalid, please check the errors');
       this.signUpForm.markAllAsTouched();
       this.signUpForm.updateValueAndValidity();
       return;
@@ -195,8 +193,7 @@ export class SignUpComponent {
     );
 
     this.authService.signUp(signUpRequest).subscribe({
-      next: (response) => {
-        toast.success('Sign-up successful');
+      next: () => {
         this.isLoading.set(false);
         this.router.navigate(['/sign-in']).then();
       },
