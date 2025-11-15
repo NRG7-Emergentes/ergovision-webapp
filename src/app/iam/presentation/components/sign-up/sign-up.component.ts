@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
+import {AuthenticationService} from '@app/iam/services/authentication.service';
+import {SignUpRequest} from '@app/iam/domain/model/sign-up.request';
 import {ZardCardComponent} from '@shared/components/card/card.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {ZardCheckboxComponent} from '@shared/components/checkbox/checkbox.component';
@@ -14,6 +16,7 @@ import {
 } from '@shared/components/form/form.component';
 import {ZardInputDirective} from '@shared/components/input/input.directive';
 import {onlyNumbersValidator} from '@shared/utils/number.validator';
+import {toast} from 'ngx-sonner';
 
 @Component({
   selector: 'app-sign-up',
@@ -35,7 +38,7 @@ import {onlyNumbersValidator} from '@shared/utils/number.validator';
           </div>
 
           <z-card class="p-4 sm:p-6 lg:p-8">
-            <form [formGroup]="signUpForm" class="space-y-4 sm:space-y-6">
+            <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()" class="space-y-4 sm:space-y-6">
 
               <z-form-field>
                 <z-form-label [zRequired]="true">Username</z-form-label>
@@ -101,8 +104,8 @@ import {onlyNumbersValidator} from '@shared/utils/number.validator';
                 <label for="terms" class="text-sm cursor-pointer select-none">Accept terms and conditions </label>
               </div>
 
-              <button type="submit" z-button zFull (click)="onSubmit()"
-                      [zLoading]="isLoading()" [disabled]="this.signUpForm.invalid">Sign in</button>
+              <button type="submit" z-button zFull
+                      [zLoading]="isLoading()" >Sign up</button>
             </form>
           </z-card>
 
@@ -120,6 +123,7 @@ import {onlyNumbersValidator} from '@shared/utils/number.validator';
 })
 export class SignUpComponent {
   private router = inject(Router);
+  private authService = inject(AuthenticationService);
   protected readonly isLoading = signal(false);
 
   protected readonly signUpForm = new FormGroup({
@@ -147,16 +151,12 @@ export class SignUpComponent {
 
     height: new FormControl('', [
       Validators.required,
-      onlyNumbersValidator(),
-      Validators.min(50),
-      Validators.max(300)
+      onlyNumbersValidator()
     ]),
 
     weight: new FormControl('', [
       Validators.required,
-      onlyNumbersValidator(),
-      Validators.min(1),
-      Validators.max(500)
+      onlyNumbersValidator()
     ]),
 
     password: new FormControl('', [
@@ -171,8 +171,40 @@ export class SignUpComponent {
 
 
   onSubmit() {
+
+    if (this.signUpForm.invalid) {
+      toast.error('Form is invalid, please check the errors');
+      this.signUpForm.markAllAsTouched();
+      this.signUpForm.updateValueAndValidity();
+      return;
+    }
+
     this.isLoading.set(true);
-    this.router.navigate(['/sign-in']);
-    this.isLoading.set(false);
+
+    const signUpRequest = new SignUpRequest(
+      this.signUpForm.value.username!,
+      this.signUpForm.value.email!,
+      this.signUpForm.value.password!,
+      this.signUpForm.value.img!,
+      Number(this.signUpForm.value.age!),
+      Number(this.signUpForm.value.height!),
+      Number(this.signUpForm.value.weight!),
+      ['ROLE_USER']
+    );
+
+    this.authService.signUp(signUpRequest).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.router.navigate(['/sign-in']).then();
+      },
+
+      error: (error) => {
+        toast.error('Sign-up failed', {
+          description: error.error.message
+        });
+        this.isLoading.set(false);
+
+      }
+    });
   }
 }

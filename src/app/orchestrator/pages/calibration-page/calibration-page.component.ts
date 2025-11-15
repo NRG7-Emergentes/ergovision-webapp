@@ -1,9 +1,10 @@
-import {Component, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {ZardDividerComponent} from '@shared/components/divider/divider.component';
 import {MonitorCamComponent} from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import type {PoseLandmarkerResult} from '@mediapipe/tasks-vision';
 import {toast} from 'ngx-sonner';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-calibration-page',
@@ -158,7 +159,7 @@ import {toast} from 'ngx-sonner';
       </div>
 
       <div class="flex gap-4 ">
-        <button z-button zType="outline" zSize="lg"> Go to Settings </button>
+        <button z-button zType="outline" zSize="lg" (click)="goToSettings()" [disabled]="isCalibrating()"> Go to Settings </button>
         <button z-button zSize="lg" (click)="startCalibration()" [disabled]="isCalibrating() || isCalibrated()">
           @if (isCalibrating()) {
             Calibrating... {{ calibrationCountdown() }}s
@@ -174,6 +175,8 @@ import {toast} from 'ngx-sonner';
   styles: ``,
 })
 export class CalibrationPageComponent implements OnInit, OnDestroy{
+
+  private router = inject(Router);
 
   protected readonly cameraAvailable = signal<boolean>(false);
 
@@ -381,6 +384,10 @@ export class CalibrationPageComponent implements OnInit, OnDestroy{
       clearInterval(this.countdownInterval);
       this.countdownInterval = undefined;
     }
+  }
+
+  goToSettings(){
+    this.router.navigate(['settings']);
   }
 
 }

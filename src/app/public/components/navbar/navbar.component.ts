@@ -4,6 +4,7 @@ import {ZardMenuModule} from '@shared/components/menu/menu.module';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
 import {Router} from '@angular/router';
+import {AuthenticationService} from '@app/iam/services/authentication.service';
 
 @Component({
   selector: 'app-navbar',
@@ -48,15 +49,15 @@ import {Router} from '@angular/router';
 })
 export class NavbarComponent {
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private authService : AuthenticationService) {
   }
 
   goToDashboard() {
-    this.router.navigate(['/dashboard/2d2631b8-0991-4934-a5a9-81c085d7f208']);
+    this.router.navigate(['/dashboard']);
   }
 
   goToProgress() {
-    this.router.navigate(['/progress/2d2631b8-0991-4934-a5a9-81c085d7f208']);
+    this.router.navigate(['/progress']);
   }
   goToStartMonitoring(){
     this.router.navigate(['/monitoring/start']);

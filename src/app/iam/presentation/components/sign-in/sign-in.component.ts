@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
 import {ErgovisionLogoComponent} from '@shared/components/ergovision-logo/ergovision-logo.component';
-import {AuthService} from "@app/iam/infrastructure/services/auth.service";
+import {AuthenticationService} from "@app/iam/services/authentication.service";
+import {SignInRequest} from '@app/iam/domain/model/sign-in.request';
 import {ZardCardComponent} from '@shared/components/card/card.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {
@@ -11,12 +12,12 @@ import {
   ZardFormFieldComponent,
   ZardFormLabelComponent
 } from '@shared/components/form/form.component';
-import {ZardCheckboxComponent} from '@shared/components/checkbox/checkbox.component';
 import {ZardInputDirective} from '@shared/components/input/input.directive';
+import {toast} from 'ngx-sonner';
 
 @Component({
   selector: 'app-sign-in',
-  imports: [CommonModule, FormsModule, RouterModule, ErgovisionLogoComponent, ZardCardComponent, ReactiveFormsModule, ZardButtonComponent, ZardFormControlComponent, ZardFormLabelComponent, ZardFormFieldComponent, ZardCheckboxComponent, ZardInputDirective],
+  imports: [CommonModule, FormsModule, RouterModule, ErgovisionLogoComponent, ZardCardComponent, ReactiveFormsModule, ZardButtonComponent, ZardFormControlComponent, ZardFormLabelComponent, ZardFormFieldComponent, ZardInputDirective],
   template: `
     <div class="grid grid-cols-2 min-h-dvh">
 
@@ -37,9 +38,9 @@ import {ZardInputDirective} from '@shared/components/input/input.directive';
           <z-card class="p-4 sm:p-6 lg:p-8 ">
             <form [formGroup]="loginForm" class="space-y-4 sm:space-y-6 ">
               <z-form-field>
-                <z-form-label [zRequired]="true">Email</z-form-label>
+                <z-form-label [zRequired]="true">Username</z-form-label>
                 <z-form-control>
-                  <input id="email" z-input type="email" formControlName="email" placeholder="name@zard.com" class="w-full"/>
+                  <input id="username" z-input type="text" formControlName="username" placeholder="ur name" class="w-full"/>
                 </z-form-control>
               </z-form-field>
 
@@ -50,10 +51,7 @@ import {ZardInputDirective} from '@shared/components/input/input.directive';
                 </z-form-control>
               </z-form-field>
 
-              <div class="flex items-center gap-2">
-                <z-checkbox id="remember" formControlName="rememberMe"></z-checkbox>
-                <label for="remember" class="text-sm cursor-pointer select-none">Remember me for 30 days</label>
-              </div>
+
 
               <button type="submit" z-button zFull (click)="onSubmit()"
                       [zLoading]="isLoading()" [disabled]="this.loginForm.invalid">Sign in</button>
@@ -75,33 +73,45 @@ import {ZardInputDirective} from '@shared/components/input/input.directive';
 })
 export class SignInComponent {
 
-  protected readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthenticationService);
   private router = inject(Router);
   protected readonly isLoading = signal(false);
 
   protected readonly loginForm = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
+    username: new FormControl('', [Validators.required]),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    rememberMe: new FormControl(false),
   });
 
   onSubmit() {
-    this.isLoading.set(true);
-
     if (this.loginForm.invalid){
       this.loginForm.markAllAsTouched();
       this.loginForm.updateValueAndValidity();
-      this.isLoading.set(false);
       return;
     }
 
-    this.authService.login();
+    this.isLoading.set(true);
 
-    if ( this.authService.isAuthenticated()){
-      this.router.navigate(['/dashboard', '123']);
-    }
+    const signInRequest = new SignInRequest(
+      this.loginForm.value.username!,
+      this.loginForm.value.password!
+    );
 
-    this.isLoading.set(false);
+    this.authService.signIn(signInRequest).subscribe({
+      next: (response) => {
+
+
+        this.isLoading.set(false);
+        // Navigation is handled by the service
+      },
+      error: (error) => {
+        toast.error('Sign-in failed', {
+          description: error.error.message
+        })
+
+        this.isLoading.set(false);
+
+      }
+    });
   }
 
 }

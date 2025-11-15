@@ -1,4 +1,5 @@
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:8080/api/v1'
+  production: true,
+  apiUrl: 'https://ergovision-backend.onrender.com/api/v1',
+  wsUrl: 'https://ergovision-backend.onrender.com'
 };

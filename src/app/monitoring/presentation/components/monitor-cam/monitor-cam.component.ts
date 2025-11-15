@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ElementRef, output, viewChild, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, output, viewChild, signal, AfterViewInit, OnDestroy } from '@angular/core';
 import { FilesetResolver, PoseLandmarker, DrawingUtils, type PoseLandmarkerResult } from '@mediapipe/tasks-vision';
 
 @Component({
@@ -18,7 +18,7 @@ import { FilesetResolver, PoseLandmarker, DrawingUtils, type PoseLandmarkerResul
     canvas { position:absolute; top:0; left:0; pointer-events:none; }
   `
 })
-export class MonitorCamComponent {
+export class MonitorCamComponent implements AfterViewInit, OnDestroy {
   // Emit pose detection results to parent components
   readonly postureResults = output<PoseLandmarkerResult | null>();
 
@@ -64,9 +64,9 @@ export class MonitorCamComponent {
   }
 
   ngOnDestroy(): void {
-    // Mark component as destroyed to prevent further emissions
     this.isDestroyed = true;
 
+    // Stop detection loop
     if (this.detectionIntervalId !== undefined) {
       clearInterval(this.detectionIntervalId);
       this.detectionIntervalId = undefined;
@@ -96,10 +96,12 @@ export class MonitorCamComponent {
     if (!this.poseLandmarker || !this.canvasCtx || !this.drawingUtils) return;
 
     this.detectionIntervalId = window.setInterval(() => {
-      // Guard against post-destruction execution
-      if (this.isDestroyed || !this.poseLandmarker || !this.canvasCtx || !this.drawingUtils) {
+      if (this.isDestroyed) {
+        clearInterval(this.detectionIntervalId);
         return;
       }
+
+      if (!this.poseLandmarker || !this.canvasCtx || !this.drawingUtils) return;
 
       const results = this.poseLandmarker.detectForVideo(video, performance.now());
 
@@ -122,10 +124,8 @@ export class MonitorCamComponent {
 
       this.canvasCtx!.restore();
 
-      // Emit results to parent only if component is still alive
-      if (!this.isDestroyed) {
-        this.postureResults.emit(results);
-      }
+      // Emit results to parent
+      this.postureResults.emit(results);
     }, 1000 / 30);
   }
 

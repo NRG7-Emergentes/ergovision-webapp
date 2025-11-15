@@ -51,7 +51,7 @@ export class ZardDialogRef<T = any, R = any, U = any> {
     this.isClosing = true;
     this.result = result;
 
-    this.containerInstance.state.set('close');
+    this.containerInstance.state.set('closed');
 
     setTimeout(() => {
       if (this.overlayRef) {

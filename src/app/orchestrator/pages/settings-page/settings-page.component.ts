@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, OnInit} from '@angular/core';
 import {ZardSwitchComponent} from '@shared/components/switch/switch.component';
 import {ZardSliderComponent} from '@shared/components/slider/slider.component';
 import {ZardSelectComponent} from '@shared/components/select/select.component';
@@ -6,6 +6,8 @@ import {ZardSelectItemComponent} from '@shared/components/select/select-item.com
 import {FormsModule} from '@angular/forms';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {Router} from '@angular/router';
+import {toast} from 'ngx-sonner';
+import {OrchestratorService} from '../../services/orchestrator.service';
 
 @Component({
   selector: 'app-settings-page',
@@ -65,12 +67,12 @@ import {Router} from '@angular/router';
               <div class="grid grid-cols-2 gap-4">
                 <div class="flex items-center justify-between ">
                   <p class="text-sm font-semibold text-foreground">Visual Alerts</p>
-                  <z-switch (checkChange)="showSkeleton.set($event)" [ngModel]="showSkeleton()" />
+                  <z-switch (checkChange)="visualAlertsEnabled.set($event)" [ngModel]="visualAlertsEnabled()" />
                 </div>
 
                 <div class="flex items-center justify-between ">
                   <p class="text-sm font-semibold text-foreground">Sound Alerts</p>
-                  <z-switch (checkChange)="showSkeleton.set($event)" [ngModel]="showSkeleton()" />
+                  <z-switch (checkChange)="soundAlertsEnabled.set($event)" [ngModel]="soundAlertsEnabled()" />
                 </div>
 
                 <div class="space-y-2">
@@ -99,13 +101,19 @@ import {Router} from '@angular/router';
 
             </div>
           </div>
-          <h2 class="text-lg font-bold text-foreground mb-4">Notifications</h2>
-          <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
-            <div class="flex items-center justify-between">
-              <label class="text-sm font-semibold text-foreground">Mail Notifications</label>
-              <z-switch/>
+          <div>
+            <h2 class="text-lg font-bold text-foreground mb-4">Notifications</h2>
+            <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
+              <div class="flex items-center justify-between">
+                <label class="text-sm font-semibold text-foreground">Mail Notifications</label>
+                <z-switch/>
+              </div>
             </div>
           </div>
+          <button z-button zSize="lg" (click)="saveSettings()">
+            <i class="icon-settings  "></i>
+            Save Config
+          </button>
         </div>
         <div class="space-y-6">
           <div>
@@ -151,16 +159,95 @@ import {Router} from '@angular/router';
   `,
   styles: ``,
 })
-export class SettingsPageComponent {
+export class SettingsPageComponent implements OnInit {
   protected readonly postureSensitivity = signal<number>(43);
   protected readonly alertVolume = signal<number>(16);
   protected readonly sampleFrequency = signal<string>('1');
   protected readonly alertInterval = signal<string>('1');
   protected readonly showSkeleton = signal<boolean>(true);
+  protected readonly visualAlertsEnabled = signal<boolean>(true);
+  protected readonly soundAlertsEnabled = signal<boolean>(true);
 
-  private router = inject(Router);
+  private readonly postureSettingId = signal<number | null>(null);
+  private readonly alertSettingId = signal<number | null>(null);
 
-  goToCalibration() {
+  private readonly router = inject(Router);
+  private readonly orchestratorService = inject(OrchestratorService);
+
+  ngOnInit(): void {
+    const userId = 1; // TODO: get from auth service
+    this.loadUserSettings(userId);
+  }
+
+  private loadUserSettings(userId: number): void {
+    this.orchestratorService.getUserPostureSetting(userId).subscribe({
+      next: (setting) => {
+        this.postureSettingId.set(setting.id);
+        this.postureSensitivity.set(setting.postureSensitivity);
+        this.sampleFrequency.set(setting.samplingFrequency.toString());
+        this.showSkeleton.set(setting.showSkeleton);
+      },
+      error: () => {
+        toast.error('Failed to load posture settings');
+      }
+    });
+
+    this.orchestratorService.getUserAlertSetting(userId).subscribe({
+      next: (setting) => {
+        this.alertSettingId.set(setting.id);
+        this.alertVolume.set(setting.alertVolume);
+        this.alertInterval.set(setting.alertInterval.toString());
+        this.visualAlertsEnabled.set(setting.visualAlertsEnabled);
+        this.soundAlertsEnabled.set(setting.soundAlertsEnabled);
+      },
+      error: () => {
+        toast.error('Failed to load alert settings');
+      }
+    });
+  }
+
+  protected saveSettings(): void {
+    const postureId = this.postureSettingId();
+    const alertId = this.alertSettingId();
+
+    if (!postureId || !alertId) {
+      toast.error('Settings not loaded yet');
+      return;
+    }
+
+    const postureData = {
+      postureSensitivity: this.postureSensitivity(),
+      shoulderAngleThreshold: 15, // TODO: get from calibration data
+      headAngleThreshold: 20, // TODO: get from calibration data
+      samplingFrequency: parseInt(this.sampleFrequency()),
+      showSkeleton: this.showSkeleton(),
+      postureThresholds: {
+        shoulderMax: 0,
+        headMax: 0,
+        shoulderMin: 0,
+        headMin: 0
+      }
+    };
+
+    const alertData = {
+      visualAlertsEnabled: this.visualAlertsEnabled(),
+      soundAlertsEnabled: this.soundAlertsEnabled(),
+      alertVolume: this.alertVolume(),
+      alertInterval: parseInt(this.alertInterval())
+    };
+
+    this.orchestratorService.updatePostureSetting(postureId, postureData).subscribe({
+      next: () => toast.success('Posture settings saved'),
+      error: () => toast.error('Error saving posture settings')
+    });
+
+    this.orchestratorService.updateAlertSetting(alertId, alertData).subscribe({
+      next: () => toast.success('Alert settings saved'),
+      error: () => toast.error('Error saving alert settings')
+    });
+  }
+
+  protected goToCalibration(): void {
     this.router.navigate(['calibration']);
   }
 }
