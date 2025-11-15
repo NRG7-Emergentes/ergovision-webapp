@@ -7,23 +7,24 @@ import { SignUpResponse } from '@app/iam/domain/model/sign-up.response';
 import { SignInRequest } from '@app/iam/domain/model/sign-in.request';
 import { SignInResponse } from '@app/iam/domain/model/sign-in.response';
 import { Observable, tap } from 'rxjs';
+import {toast} from 'ngx-sonner';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
+  private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
 
   baseUrl: string = `${environment.apiUrl}`;
-  httpOptions = { headers: new HttpHeaders({'Content-type': 'application/json'})};
+  httpOptions = { headers: new HttpHeaders({ 'Content-type': 'application/json' }) };
 
-  // Signals to track authentication state
-  isSignedIn = signal<boolean>(this.hasValidToken());
-  userId = signal<number | null>(null);
-  username = signal<string | null>(null);
-  userImageUrl = signal<string | null>(null);
-  userRoles = signal<string[]>([]);
-
-  constructor(private router: Router, private http: HttpClient) {}
+  // Signals to track authentication state (readonly to prevent reassignment)
+  readonly isSignedIn = signal<boolean>(this.hasValidToken());
+  readonly userId = signal<number | null>(null);
+  readonly username = signal<string | null>(null);
+  readonly userImageUrl = signal<string | null>(null);
+  readonly userRoles = signal<string[]>([]);
 
   /**
    * Try to auto sign in from stored token
@@ -96,13 +97,14 @@ export class AuthenticationService {
       this.httpOptions
     ).pipe(
       tap(response => {
+        console.log('Sign-in successful:', response);
 
         // Update signals
         this.isSignedIn.set(true);
         this.userId.set(response.id);
         this.username.set(response.username);
-        this.userRoles.set(response.roles);
-        this.userImageUrl.set(response.imageUrl);
+        this.userRoles.set(response.roles || []);
+        this.userImageUrl.set(response.imageUrl || null);
 
         // Store in localStorage
         localStorage.setItem('token', response.token);

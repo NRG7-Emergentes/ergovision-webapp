@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MonitorCamComponent} from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import {ZardButtonComponent} from '@shared/components/button/button.component';
 import {ZardSwitchComponent} from '@shared/components/switch/switch.component';
@@ -11,6 +11,9 @@ import {
 } from '@app/monitoring/presentation/components/active-pause-dialog/active-pause-dialog.component';
 import type {PoseLandmarkerResult} from '@mediapipe/tasks-vision';
 import {toast} from 'ngx-sonner';
+import {WebsocketNotificationService} from '@app/notifications/infrastructure/websocket-notification.service';
+
+type MonitoringState = 'ACTIVE' | 'PAUSED' | 'FINALIZED';
 
 @Component({
   selector: 'app-monitoring-active',
@@ -117,6 +120,7 @@ import {toast} from 'ngx-sonner';
     </div>
   `,
   styles: ``,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MonitoringActiveComponent implements OnInit, OnDestroy {
   protected readonly visualAlerts = signal<boolean>(true);
@@ -138,8 +142,12 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   protected readonly pauseTime = signal<number>(0); // current pause duration in seconds
   protected readonly pausesTaken = signal<number>(0); // total number of pauses in this session
 
-  private router = inject(Router);
-  private dialogService = inject(ZardDialogService);
+  // Monitoring state
+  protected readonly currentState = signal<MonitoringState>('ACTIVE');
+
+  private readonly router = inject(Router);
+  private readonly dialogService = inject(ZardDialogService);
+  private readonly wsService = inject(WebsocketNotificationService);
 
   // Pause timer
   private pauseTimerInterval: number | undefined;
@@ -169,6 +177,28 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   private beepAudio: HTMLAudioElement | null = null;
 
   ngOnInit(): void {
+    // Connect to WebSocket
+    this.wsService.connect();
+
+    // Wait for connection before proceeding
+    setTimeout(() => {
+      if (this.wsService.connected()) {
+        console.log('[MonitoringActive] WebSocket connected, sending initial state');
+        this.sendStateNotification('ACTIVE');
+      } else {
+        console.error('[MonitoringActive] WebSocket not connected');
+        toast.error('Failed to connect to notification server');
+      }
+    }, 1000);
+
+    // Listen to incoming notifications from backend
+    this.wsService.notifications$.subscribe(notification => {
+      if (!notification) return;
+      toast.info(`[${notification.type}] ${notification.title}`, {
+        description: notification.message
+      });
+    });
+
     // Initialize audio
     this.beepAudio = new Audio('/assets/beep.opus');
     this.beepAudio.load();
@@ -192,6 +222,11 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Send finalization notification if not already sent
+    if (this.currentState() !== 'FINALIZED') {
+      this.sendStateNotification('FINALIZED');
+    }
+
     // Clean up timers
     if (this.monitoringInterval !== undefined) {
       clearInterval(this.monitoringInterval);
@@ -215,6 +250,9 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
       this.beepAudio.pause();
       this.beepAudio = null;
     }
+
+    // Disconnect WebSocket
+    this.wsService.disconnect();
   }
 
   onPostureResults(results: PoseLandmarkerResult | null): void {
@@ -338,13 +376,24 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 
-  onFinishSession(){
-    this.router.navigate(['/history']);
+  onFinishSession(): void {
+    this.currentState.set('FINALIZED');
+    this.sendStateNotification('FINALIZED');
+
+    toast.success('Monitoring session has ended', {
+      description: 'Your session data has been saved'
+    });
+
+    setTimeout(() => {
+      this.router.navigate(['/history']);
+    }, 1000);
   }
 
-  onPauseInit(){
+  onPauseInit(): void {
     // Set pause state
     this.isPaused.set(true);
+    this.currentState.set('PAUSED');
+    this.sendStateNotification('PAUSED');
 
     // Increment pauses taken
     this.pausesTaken.set(this.pausesTaken() + 1);
@@ -383,6 +432,8 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
 
     // Resume monitoring
     this.isPaused.set(false);
+    this.currentState.set('ACTIVE');
+    this.sendStateNotification('ACTIVE');
 
     // Reset next pause timer
     this.nextPauseTime.set(30);
@@ -390,5 +441,38 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     console.log('Pause Finished - Total pause time:', this.formatTime(this.pauseTime()));
   }
 
+  private sendStateNotification(state: MonitoringState): void {
+    if (!this.wsService.connected()) {
+      console.error('[MonitoringActive] Cannot send notification - WebSocket not connected');
+      toast.error('Cannot send notification - not connected to server');
+      return;
+    }
 
+    const title = `Monitoring ${state}`;
+    const message =
+      state === 'ACTIVE'
+        ? 'Monitoring session is active'
+        : state === 'PAUSED'
+        ? 'Monitoring has been paused'
+        : 'Monitoring session has ended';
+
+    // Send via WebSocket only
+    this.wsService.sendNotification(title, message);
+    console.log(`[Notification] ${state} sent via WebSocket`);
+
+    // Show toast based on state
+    if (state === 'ACTIVE') {
+      toast.success('✅ Monitoring Active', {
+        description: 'Your posture is being monitored'
+      });
+    } else if (state === 'PAUSED') {
+      toast.warning('⏸️ Monitoring Paused', {
+        description: 'Take a break and stretch'
+      });
+    } else if (state === 'FINALIZED') {
+      toast.info('Session Ended', {
+        description: 'Your monitoring session has been saved'
+      });
+    }
+  }
 }

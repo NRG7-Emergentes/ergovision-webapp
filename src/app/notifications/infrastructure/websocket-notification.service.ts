@@ -1,7 +1,7 @@
 // websocket-notification.service.ts
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
@@ -18,80 +18,114 @@ interface Notification {
 
 @Injectable({ providedIn: 'root' })
 export class WebsocketNotificationService {
-  private stompClient: any;
+  private readonly http = inject(HttpClient);
 
-  // 🔹 Signal para el estado de conexión
+  private stompClient: Stomp.Client | null = null;
+
+  // Signal for connection state
   readonly connected = signal<boolean>(false);
+  readonly notifications$ = new BehaviorSubject<Notification | null>(null);
 
-  public isConnected$ = new BehaviorSubject<boolean>(false);
-  public notifications$ = new BehaviorSubject<Notification | null>(null);
-
-  // ✅ Ya no duplicamos `/api/v1`
-  private baseUrl = `${environment.apiUrl}/notifications`;
-
-  constructor(private http: HttpClient) {}
+  private readonly baseUrl = `${environment.apiUrl}/notifications`;
 
   connect(): void {
-    // 🔹 Si ya está conectado, no reconectar
+    // If already connected, avoid reconnect
     if (this.stompClient?.connected) {
       this.connected.set(true);
-      this.isConnected$.next(true);
-      console.log('[WebSocket] Ya conectado ✅');
+      console.log('[WebSocket] Already connected ✅');
       return;
     }
 
-    // ✅ usamos el nuevo wsUrl
-    const socket = new SockJS(`${environment.wsUrl}/ws-notifications`);
-    this.stompClient = Stomp.over(socket);
+    // Get token and strip quotes if present
+    const rawToken = localStorage.getItem('token');
+    if (!rawToken) {
+      console.error('[WebSocket] No token found in localStorage');
+      this.connected.set(false);
+      return;
+    }
 
-    this.stompClient.connect(
-      {},
-      () => {
-        this.connected.set(true);
-        this.isConnected$.next(true);
-        console.log('[WebSocket] Conectado al servidor ✅');
+    const token = rawToken.replace(/^["']|["']$/g, '').trim();
 
-        this.stompClient.subscribe('/topic/notifications', (message: any) => {
-          const notification = JSON.parse(message.body);
-          console.log('[WebSocket] Notificación recibida:', notification);
-          this.notifications$.next(notification);
-        });
-      },
-      (error: any) => {
-        this.connected.set(false);
-        this.isConnected$.next(false);
-        console.error('[WebSocket] Error de conexión ❌', error);
-      }
-    );
+    if (!token) {
+      console.error('[WebSocket] Token is empty after cleaning');
+      this.connected.set(false);
+      return;
+    }
+
+    // Append token as query parameter (SockJS doesn't support custom headers)
+    const wsEndpoint = `${environment.wsUrl}/ws-notifications?token=${encodeURIComponent(token)}`;
+
+    console.log('[WebSocket] Connecting to:', wsEndpoint.replace(/token=[^&]+/, 'token=***'));
+
+    try {
+      const socket = new SockJS(wsEndpoint);
+      this.stompClient = Stomp.over(socket);
+
+      // Disable debug logging
+      // @ts-ignore
+      this.stompClient.debug = null;
+
+      this.stompClient.connect(
+        {},
+        () => {
+          this.connected.set(true);
+          console.log('[WebSocket] Connected successfully ✅');
+
+          if (this.stompClient) {
+            this.stompClient.subscribe('/topic/notifications', (message) => {
+              try {
+                const notification = JSON.parse(message.body) as Notification;
+                console.log('[WebSocket] Notification received:', notification);
+                this.notifications$.next(notification);
+              } catch (error) {
+                console.error('[WebSocket] Failed to parse notification:', error);
+              }
+            });
+          }
+        },
+        (error) => {
+          this.connected.set(false);
+          console.error('[WebSocket] Connection error ❌', error);
+        }
+      );
+    } catch (error) {
+      this.connected.set(false);
+      console.error('[WebSocket] Failed to create connection:', error);
+    }
   }
 
   disconnect(): void {
-    this.stompClient?.disconnect(() => {
-      this.connected.set(false);
-      this.isConnected$.next(false);
-      console.log('[WebSocket] Desconectado');
-    });
+    if (this.stompClient) {
+      this.stompClient.disconnect(() => {
+        this.connected.set(false);
+        this.stompClient = null;
+        console.log('[WebSocket] Disconnected');
+      });
+    }
   }
 
   isConnected(): boolean {
     return this.connected();
   }
 
-  // 🔹 Enviar notificación directamente vía WebSocket
+  // Send notification through websocket (expects server-side mapping)
   sendNotification(title: string, message: string): void {
     if (!this.stompClient?.connected) {
-      console.error('[WebSocket] No conectado. No se puede enviar notificación.');
+      console.error('[WebSocket] Not connected. Cannot send notification.');
       return;
     }
 
     const notification = { title, message };
 
-    this.stompClient.send('/app/notify', {}, JSON.stringify(notification));
-
-    console.log('[WebSocket] Notificación enviada:', notification);
+    try {
+      this.stompClient.send('/app/notify', {}, JSON.stringify(notification));
+      console.log('[WebSocket] Notification sent:', notification);
+    } catch (error) {
+      console.error('[WebSocket] Failed to send notification:', error);
+    }
   }
 
-  // 🔹 Envío REST
+  // Send via REST as backup
   sendNotificationViaRest(notification: Notification): Observable<unknown> {
     return this.http.post(`${this.baseUrl}`, notification);
   }
