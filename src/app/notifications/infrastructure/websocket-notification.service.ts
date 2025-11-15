@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { Injectable, signal, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import * as Stomp from 'stompjs';
 
 interface Notification {
   userId: number;
@@ -20,7 +20,7 @@ interface Notification {
 export class WebsocketNotificationService {
   private readonly http = inject(HttpClient);
 
-  private stompClient: Stomp.Client | null = null;
+  private stompClient: Client | null = null;
 
   // Signal for connection state
   readonly connected = signal<boolean>(false);
@@ -58,36 +58,45 @@ export class WebsocketNotificationService {
     console.log('[WebSocket] Connecting to:', wsEndpoint.replace(/token=[^&]+/, 'token=***'));
 
     try {
-      const socket = new SockJS(wsEndpoint);
-      this.stompClient = Stomp.over(socket);
-
-      // Disable debug logging
-      // @ts-ignore
-      this.stompClient.debug = null;
-
-      this.stompClient.connect(
-        {},
-        () => {
-          this.connected.set(true);
-          console.log('[WebSocket] Connected successfully ✅');
-
-          if (this.stompClient) {
-            this.stompClient.subscribe('/topic/notifications', (message) => {
-              try {
-                const notification = JSON.parse(message.body) as Notification;
-                console.log('[WebSocket] Notification received:', notification);
-                this.notifications$.next(notification);
-              } catch (error) {
-                console.error('[WebSocket] Failed to parse notification:', error);
-              }
-            });
-          }
+      this.stompClient = new Client({
+        webSocketFactory: () => new SockJS(wsEndpoint),
+        debug: (str) => {
+          // Optionally log debug messages
+          // console.log('[WebSocket Debug]', str);
         },
-        (error) => {
-          this.connected.set(false);
-          console.error('[WebSocket] Connection error ❌', error);
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      });
+
+      this.stompClient.onConnect = () => {
+        this.connected.set(true);
+        console.log('[WebSocket] Connected successfully ✅');
+
+        if (this.stompClient) {
+          this.stompClient.subscribe('/topic/notifications', (message) => {
+            try {
+              const notification = JSON.parse(message.body) as Notification;
+              console.log('[WebSocket] Notification received:', notification);
+              this.notifications$.next(notification);
+            } catch (error) {
+              console.error('[WebSocket] Failed to parse notification:', error);
+            }
+          });
         }
-      );
+      };
+
+      this.stompClient.onStompError = (frame) => {
+        this.connected.set(false);
+        console.error('[WebSocket] STOMP error ❌', frame);
+      };
+
+      this.stompClient.onWebSocketError = (event) => {
+        this.connected.set(false);
+        console.error('[WebSocket] WebSocket error ❌', event);
+      };
+
+      this.stompClient.activate();
     } catch (error) {
       this.connected.set(false);
       console.error('[WebSocket] Failed to create connection:', error);
@@ -96,11 +105,10 @@ export class WebsocketNotificationService {
 
   disconnect(): void {
     if (this.stompClient) {
-      this.stompClient.disconnect(() => {
-        this.connected.set(false);
-        this.stompClient = null;
-        console.log('[WebSocket] Disconnected');
-      });
+      this.stompClient.deactivate();
+      this.connected.set(false);
+      this.stompClient = null;
+      console.log('[WebSocket] Disconnected');
     }
   }
 
@@ -118,7 +126,10 @@ export class WebsocketNotificationService {
     const notification = { title, message };
 
     try {
-      this.stompClient.send('/app/notify', {}, JSON.stringify(notification));
+      this.stompClient.publish({
+        destination: '/app/notify',
+        body: JSON.stringify(notification)
+      });
       console.log('[WebSocket] Notification sent:', notification);
     } catch (error) {
       console.error('[WebSocket] Failed to send notification:', error);
