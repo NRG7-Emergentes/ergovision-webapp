@@ -7,10 +7,12 @@ import { toast } from 'ngx-sonner';
 import { MonitorCamComponent } from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import { ActivePauseDialogComponent } from '@app/monitoring/presentation/components/active-pause-dialog/active-pause-dialog.component';
 import { WebsocketNotificationService } from '@app/notifications/infrastructure/websocket-notification.service';
+import { MonitoringSessionService } from '@app/monitoring/presentation/services/monitoring-session.service';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { ZardSwitchComponent } from '@shared/components/switch/switch.component';
 import { ZardSliderComponent } from '@shared/components/slider/slider.component';
 import { ZardDialogService } from '@shared/components/dialog/dialog.service';
+import {MonitoringSession} from '@app/monitoring/presentation/domain/model/monitoring-session';
 
 type MonitoringState = 'ACTIVE' | 'PAUSED' | 'FINALIZED';
 
@@ -136,6 +138,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly dialogService = inject(ZardDialogService);
   private readonly wsService = inject(WebsocketNotificationService);
+  private readonly monitoringSessionService = inject(MonitoringSessionService);
 
   // State signals
   readonly visualAlerts = signal(true);
@@ -149,8 +152,12 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   readonly isPaused = signal(false);
   readonly pauseTime = signal(0);
   readonly pausesTaken = signal(0);
+  readonly totalPauseDuration = signal(0);
   readonly currentState = signal<MonitoringState>('ACTIVE');
   readonly wsConnected = signal(false);
+
+  // Session tracking
+  private sessionStartTime: Date = new Date();
 
   // Computed signals
   readonly formattedMonitoringTime = computed(() => this.formatTime(this.monitoringTime()));
@@ -187,7 +194,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     },
     FINALIZED: {
       title: 'Monitoring FINALIZED',
-      message: 'Monitoring session has ended',
+      message: 'Monitoring session has ended ',
       toastType: 'info',
       toastDescription: 'Your monitoring session has been saved'
     }
@@ -317,9 +324,57 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     this.currentState.set('FINALIZED');
     this.sendStateNotification('FINALIZED');
 
-    setTimeout(() => {
-      this.router.navigate(['/history']);
-    }, 1000);
+    const endDate = new Date();
+    const duration = this.monitoringTime();
+    const goodPostureTime = duration - this.badPostureTime();
+    const averagePauseDuration = this.pausesTaken() > 0
+      ? this.totalPauseDuration() / this.pausesTaken()
+      : 0;
+
+    // Calculate scores (0-100 scale)
+    const goodPosturePercentage = duration > 0 ? (goodPostureTime / duration) * 100 : 0;
+    const badPosturePercentage = duration > 0 ? (this.badPostureTime() / duration) * 100 : 0;
+    const score = Math.round(goodPosturePercentage);
+
+    const sessionData: Omit<MonitoringSession, 'id'> = {
+      startDate: this.sessionStartTime,
+      endDate: endDate,
+      score: score,
+      goodScore: Math.round(goodPosturePercentage),
+      badScore: Math.round(badPosturePercentage),
+      goodPostureTime: goodPostureTime,
+      badPostureTime: this.badPostureTime(),
+      duration: duration,
+      numberOfPauses: this.pausesTaken(),
+      averagePauseDuration: Math.round(averagePauseDuration)
+    };
+
+    // Create monitoring session
+    this.monitoringSessionService.createMonitoringSession(sessionData).subscribe({
+      next: (session) => {
+
+        setTimeout(() => {
+          this.router.navigate(['/history']);
+        }, 1000);
+      },
+      error: (error) => {
+        console.error('[MonitoringSession] Failed to create:', error);
+
+        if (this.activeToastId) {
+          toast.dismiss(this.activeToastId);
+        }
+
+        this.activeToastId = toast.error('Failed to save session', {
+          description: 'Your session data could not be saved',
+          duration: 4000
+        });
+
+        // Still navigate after error to prevent user from being stuck
+        setTimeout(() => {
+          this.router.navigate(['/history']);
+        }, 2000);
+      }
+    });
   }
 
   // Private methods - Initialization
@@ -494,6 +549,9 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
       clearInterval(this.pauseTimerIntervalId);
       this.pauseTimerIntervalId = undefined;
     }
+
+    // Accumulate pause duration
+    this.totalPauseDuration.update(total => total + this.pauseTime());
 
     this.isPaused.set(false);
     this.currentState.set('ACTIVE');
