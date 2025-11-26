@@ -7,6 +7,7 @@ import { toast } from 'ngx-sonner';
 import { MonitorCamComponent } from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import { ActivePauseDialogComponent } from '@app/monitoring/presentation/components/active-pause-dialog/active-pause-dialog.component';
 import { WebsocketNotificationService } from '@app/notifications/infrastructure/websocket-notification.service';
+import { MonitoringSessionService } from '@app/monitoring/services/monitoring-session.service';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { ZardSwitchComponent } from '@shared/components/switch/switch.component';
 import { ZardSliderComponent } from '@shared/components/slider/slider.component';
@@ -136,6 +137,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly dialogService = inject(ZardDialogService);
   private readonly wsService = inject(WebsocketNotificationService);
+  private readonly sessionService = inject(MonitoringSessionService);
 
   // State signals
   readonly visualAlerts = signal(true);
@@ -264,6 +266,10 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     this.initializeWebSocket();
     this.initializeAudio();
     this.startTimers();
+    
+    // Initialize monitoring session
+    console.log('[MonitoringActive] Starting new monitoring session');
+    this.sessionService.startSession();
   }
 
   ngOnDestroy(): void {
@@ -314,12 +320,46 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   }
 
   finishSession(): void {
-    this.currentState.set('FINALIZED');
-    this.sendStateNotification('FINALIZED');
+    console.log('[MonitoringActive] Finishing session and saving to backend...');
+    
+    // Update session data with final values
+    const goodPostureTime = this.monitoringTime() - this.badPostureTime();
+    this.sessionService.updateSessionData({
+      goodPostureTime: goodPostureTime,
+      badPostureTime: this.badPostureTime(),
+      numberOfPauses: this.pausesTaken(),
+      totalPauseTime: this.pauseTime()
+    });
 
-    setTimeout(() => {
-      this.router.navigate(['/history']);
-    }, 1000);
+    // Save session to backend/local storage
+    this.sessionService.saveSession().subscribe({
+      next: (response) => {
+        console.log('[MonitoringActive] Session saved successfully:', response);
+        this.currentState.set('FINALIZED');
+        this.sendStateNotification('FINALIZED');
+        
+        toast.success('Session saved', {
+          description: 'Your monitoring session has been saved successfully'
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['/history']);
+        }, 1000);
+      },
+      error: (error) => {
+        console.error('[MonitoringActive] Error saving session:', error);
+        this.currentState.set('FINALIZED');
+        this.sendStateNotification('FINALIZED');
+        
+        toast.warning('Session saved locally', {
+          description: 'Session was saved locally and will sync when backend is available'
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['/history']);
+        }, 1000);
+      }
+    });
   }
 
   // Private methods - Initialization

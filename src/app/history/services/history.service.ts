@@ -9,10 +9,12 @@ import {
   SessionSummary,
   SessionDetail
 } from '@app/history/models/session.model';
+import { AuthenticationService } from '@app/iam/services/authentication.service';
 
 @Injectable({ providedIn: 'root' })
 export class HistoryService {
   private http = inject(HttpClient);
+  private authService = inject(AuthenticationService);
   private readonly apiUrl = `${environment.apiUrl}/monitoringSession`;
   private readonly LOCAL_KEY = 'local_sessions_queue_v1';
 
@@ -20,11 +22,21 @@ export class HistoryService {
    * Get all sessions for the current user
    */
   listSessions(): Observable<SessionSummary[]> {
-    const url = this.apiUrl;
+    // Get userId from localStorage or from the auth service
+    const userId = localStorage.getItem('user_id') || this.authService.userId()?.toString();
+    
+    if (!userId) {
+      console.warn('[HistoryService] No user_id found, returning local sessions only');
+      const local = this.getLocalSessions();
+      return of(local.map(this.mapToSummary.bind(this)));
+    }
+
+    const url = `${this.apiUrl}/user/${userId}`;
     console.log('[HistoryService] GET request to:', url);
+    
     return this.http.get<SessionResponse[]>(url).pipe(
       catchError(err => {
-        console.warn('[HistoryService] GET failed, returning backend empty and will include local sessions', err);
+        console.warn('[HistoryService] GET failed, returning local sessions only', err);
         return of([] as SessionResponse[]);
       }),
       map(sessions => {
@@ -43,6 +55,24 @@ export class HistoryService {
    * Get detailed information about a specific session
    */
   getSession(id: string): Observable<SessionDetail | undefined> {
+    const numericId = parseInt(id, 10);
+    
+    // If ID is negative, it's a local session
+    if (numericId < 0) {
+      console.log('[HistoryService] Looking for local session with ID:', id);
+      const localSessions = this.getLocalSessions();
+      const session = localSessions.find(s => s.id === numericId);
+      
+      if (session) {
+        console.log('[HistoryService] Found local session:', session);
+        return of(this.mapToDetail(session));
+      } else {
+        console.warn('[HistoryService] Local session not found:', id);
+        return of(undefined);
+      }
+    }
+    
+    // Otherwise, fetch from backend
     const url = `${this.apiUrl}/${id}`;
     console.log('[HistoryService] GET request to:', url);
     
@@ -52,6 +82,20 @@ export class HistoryService {
         const mapped = this.mapToDetail(session);
         console.log('[HistoryService] Mapped session detail:', mapped);
         return mapped;
+      }),
+      catchError(err => {
+        console.error('[HistoryService] Error fetching session from backend:', err);
+        
+        // Try to find in local sessions as fallback
+        const localSessions = this.getLocalSessions();
+        const session = localSessions.find(s => s.id === numericId);
+        
+        if (session) {
+          console.log('[HistoryService] Found session in local fallback:', session);
+          return of(this.mapToDetail(session));
+        }
+        
+        return of(undefined);
       })
     );
   }
@@ -173,6 +217,7 @@ export class HistoryService {
    * Map API response to SessionSummary for list display
    */
   private mapToSummary(session: SessionResponse): SessionSummary {
+    console.log('[HistoryService] Mapping session to summary:', session);
     return {
       id: session.id.toString(),
       date: this.formatDate(session.startDate),
@@ -215,11 +260,39 @@ export class HistoryService {
   }
 
   /**
-   * Format ISO date string to readable format (YYYY-MM-DD)
+   * Format date string to readable format (YYYY-MM-DD)
+   * Handles backend format: DD-MM-YYYY HH:mm:ss
    */
-  private formatDate(isoDate: string): string {
-    const date = new Date(isoDate);
-    return date.toISOString().split('T')[0];
+  private formatDate(dateString: string): string {
+    try {
+      if (!dateString) return 'N/A';
+      
+      // If it's already in YYYY-MM-DD format, return as is
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        return dateString;
+      }
+      
+      // Parse backend format: DD-MM-YYYY HH:mm:ss
+      const dateTimeRegex = /^(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/;
+      const match = dateString.match(dateTimeRegex);
+      
+      if (match) {
+        const [, day, month, year] = match;
+        return `${year}-${month}-${day}`;
+      }
+      
+      // Try to parse as standard date
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+      
+      console.warn('[HistoryService] Invalid date format:', dateString);
+      return 'Invalid Date';
+    } catch (error) {
+      console.error('[HistoryService] Error formatting date:', dateString, error);
+      return 'Invalid Date';
+    }
   }
 
   /**

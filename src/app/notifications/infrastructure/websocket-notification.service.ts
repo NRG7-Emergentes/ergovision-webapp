@@ -60,7 +60,7 @@ export class WebsocketNotificationService {
     try {
       this.stompClient = new Client({
         webSocketFactory: () => new SockJS(wsEndpoint),
-        debug: (str) => {
+        debug: (str: string) => {
           // Optionally log debug messages
           // console.log('[WebSocket Debug]', str);
         },
@@ -74,7 +74,7 @@ export class WebsocketNotificationService {
         console.log('[WebSocket] Connected successfully ✅');
 
         if (this.stompClient) {
-          this.stompClient.subscribe('/topic/notifications', (message) => {
+          this.stompClient.subscribe('/topic/notifications', (message: any) => {
             try {
               const notification = JSON.parse(message.body) as Notification;
               console.log('[WebSocket] Notification received:', notification);
@@ -86,12 +86,12 @@ export class WebsocketNotificationService {
         }
       };
 
-      this.stompClient.onStompError = (frame) => {
+      this.stompClient.onStompError = (frame: any) => {
         this.connected.set(false);
         console.error('[WebSocket] STOMP error ❌', frame);
       };
 
-      this.stompClient.onWebSocketError = (event) => {
+      this.stompClient.onWebSocketError = (event: any) => {
         this.connected.set(false);
         console.error('[WebSocket] WebSocket error ❌', event);
       };
