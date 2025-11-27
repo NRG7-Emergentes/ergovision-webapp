@@ -41,7 +41,7 @@ export interface AlertSetting {
   visualAlertsEnabled: boolean;
   soundAlertsEnabled: boolean;
   alertVolume: number;
-  alertInterval: number;
+  pauseInterval: number;
 }
 
 export interface CreateAlertSetting {
@@ -49,12 +49,12 @@ export interface CreateAlertSetting {
   visualAlertsEnabled: boolean;
   soundAlertsEnabled: boolean;
   alertVolume: number;
-  alertInterval: number;
+  pauseInterval: number;
 }
 
 export interface UpdateAlertSetting {
   visualAlertsEnabled: boolean;
   soundAlertsEnabled: boolean;
   alertVolume: number;
-  alertInterval: number;
+  pauseInterval: number;
 }
