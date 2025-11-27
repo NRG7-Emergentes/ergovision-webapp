@@ -44,22 +44,22 @@ export class OrchestratorService {
   // ===================== ALERT SETTINGS =====================
 
   getUserAlertSetting(userId: number): Observable<AlertSetting> {
-    return this.http.get<AlertSetting>(`${this.apiUrl}/alert-settings/user/${userId}`);
+    return this.http.get<AlertSetting>(`${this.apiUrl}/alerts-settings/user/${userId}`);
   }
 
   getAlertSettingById(id: number): Observable<AlertSetting> {
-    return this.http.get<AlertSetting>(`${this.apiUrl}/alert-settings/${id}`);
+    return this.http.get<AlertSetting>(`${this.apiUrl}/alerts-settings/${id}`);
   }
 
   createAlertSetting(resource: CreateAlertSetting): Observable<number> {
-    return this.http.post<number>(`${this.apiUrl}/alert-settings`, resource);
+    return this.http.post<number>(`${this.apiUrl}/alerts-settings`, resource);
   }
 
   updateAlertSetting(id: number, resource: UpdateAlertSetting): Observable<number> {
-    return this.http.put<number>(`${this.apiUrl}/alert-settings/${id}`, resource);
+    return this.http.put<number>(`${this.apiUrl}/alerts-settings/${id}`, resource);
   }
 
   deleteAlertSetting(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/alert-settings/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/alerts-settings/${id}`);
   }
 }
