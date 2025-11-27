@@ -58,3 +58,18 @@ export interface UpdateAlertSetting {
   alertVolume: number;
   pauseInterval: number;
 }
+
+export interface NotificationSetting {
+  id: number;
+  userId: number;
+  emailNotifications: boolean;
+}
+
+export interface CreateNotificationSetting {
+  userId: number;
+  emailNotifications: boolean;
+}
+
+export interface UpdateNotificationSetting {
+  emailNotifications: boolean;
+}
