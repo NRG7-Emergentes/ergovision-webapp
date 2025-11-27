@@ -30,9 +30,11 @@ export class SettingsPageComponent implements OnInit {
   protected readonly showSkeleton = signal<boolean>(true);
   protected readonly visualAlertsEnabled = signal<boolean>(true);
   protected readonly soundAlertsEnabled = signal<boolean>(true);
+  protected readonly emailNotificationsEnabled = signal<boolean>(true);
 
   private readonly postureSettingId = signal<number | null>(null);
   private readonly alertSettingId = signal<number | null>(null);
+  private readonly notificationSettingId = signal<number | null>(null);
 
   private readonly router = inject(Router);
   private readonly orchestratorService = inject(OrchestratorService);
@@ -73,16 +75,19 @@ export class SettingsPageComponent implements OnInit {
         this.pauseInterval.set(setting.pauseInterval);
         this.visualAlertsEnabled.set(setting.visualAlertsEnabled);
         this.soundAlertsEnabled.set(setting.soundAlertsEnabled);
-        console.log('Alert Settings:', {
-          id: setting.id,
-          volume: setting.alertVolume,
-          interval: setting.pauseInterval,
-          visualEnabled: setting.visualAlertsEnabled,
-          soundEnabled: setting.soundAlertsEnabled
-        });
       },
       error: () => {
         toast.error('Failed to load alert settings');
+      }
+    });
+
+    this.orchestratorService.getUserNotificationSetting(userId).subscribe({
+      next: (setting) => {
+        this.notificationSettingId.set(setting.id);
+        this.emailNotificationsEnabled.set(setting.emailNotifications);
+      },
+      error: () => {
+        toast.error('Failed to load notification settings');
       }
     });
   }
@@ -90,8 +95,9 @@ export class SettingsPageComponent implements OnInit {
   protected saveSettings(): void {
     const postureId = this.postureSettingId();
     const alertId = this.alertSettingId();
+    const notificationId = this.notificationSettingId();
 
-    if (!postureId || !alertId) {
+    if (!postureId || !alertId || !notificationId) {
       toast.error('Settings not loaded yet');
       return;
     }
@@ -117,6 +123,10 @@ export class SettingsPageComponent implements OnInit {
       pauseInterval: this.pauseInterval()
     };
 
+    const notificationData = {
+      emailNotifications: this.emailNotificationsEnabled()
+    };
+
     this.orchestratorService.updatePostureSetting(postureId, postureData).subscribe({
       next: () => toast.success('Posture settings saved'),
       error: () => toast.error('Error saving posture settings')
@@ -125,6 +135,11 @@ export class SettingsPageComponent implements OnInit {
     this.orchestratorService.updateAlertSetting(alertId, alertData).subscribe({
       next: () => toast.success('Alert settings saved'),
       error: () => toast.error('Error saving alert settings')
+    });
+
+    this.orchestratorService.updateNotificationSetting(notificationId, notificationData).subscribe({
+      next: () => toast.success('Notification settings saved'),
+      error: () => toast.error('Error saving notification settings')
     });
   }
 
