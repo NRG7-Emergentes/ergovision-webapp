@@ -5,6 +5,7 @@ import {ZardButtonComponent} from '@shared/components/button/button.component';
 import type {PoseLandmarkerResult} from '@mediapipe/tasks-vision';
 import {toast} from 'ngx-sonner';
 import {Router} from '@angular/router';
+import {OrchestratorService} from '@app/orchestrator/services/orchestrator.service';
 
 @Component({
   selector: 'app-calibration-page',
@@ -182,10 +183,16 @@ export class CalibrationPageComponent implements OnInit, OnDestroy{
 
   protected readonly cameraDistance = signal<number>(0);
   protected readonly cameraVisibility = signal<number>(0);
+  protected readonly shoulderAngle = signal<number>(0);
+  protected readonly headAngle = signal<number>(0);
 
   protected readonly isCalibrating = signal<boolean>(false);
   protected readonly calibrationCountdown = signal<number>(0);
   protected readonly isCalibrated = signal<boolean>(false);
+
+  private readonly calibrationDetailsId = signal<number | null>(null);
+
+  private readonly orchestratorService = inject(OrchestratorService);
 
   private calibrationTimeout: number | undefined;
   private countdownInterval: number | undefined;
@@ -212,7 +219,30 @@ export class CalibrationPageComponent implements OnInit, OnDestroy{
   };
 
   ngOnInit(): void {
+
+    const userIdStr = localStorage.getItem("user_id");
+    if (!userIdStr) {
+      toast.error('User not authenticated');
+      this.router.navigate(['/login']);
+      return;
+    }
+    const userId = userIdStr ? parseInt(userIdStr) : 0;
+    if (isNaN(userId)) {
+      toast.error('Invalid user ID');
+      this.router.navigate(['/login']);
+      return;
+    }
+
     this.checkCameraAvailability();
+
+    this.orchestratorService.getUserCalibrationDetails(userId).subscribe({
+      next: (details) => {
+        this.calibrationDetailsId.set(details.id);
+      },
+      error: () => {
+        toast.error('Failed to load calibration details');
+      }
+    });
   }
 
   async checkCameraAvailability(): Promise<void> {
@@ -240,6 +270,8 @@ export class CalibrationPageComponent implements OnInit, OnDestroy{
     // Calculate camera distance based on shoulder width
     const distance = this.calculateCameraDistance(landmarks);
     const visibility = this.calculateVisibility(landmarks);
+    const shoulder = this.calculateShoulderAngle(landmarks);
+    const head = this.calculateHeadAngle(landmarks);
 
     if (this.isCalibrated()) {
       // If already calibrated, just store the latest values without updating the display
@@ -253,6 +285,8 @@ export class CalibrationPageComponent implements OnInit, OnDestroy{
       }
       this.cameraVisibility.set(Math.round(visibility));
       this.latestVisibility = Math.round(visibility);
+      this.shoulderAngle.set(Math.round(shoulder));
+      this.headAngle.set(Math.round(head));
     }
   }
 
@@ -325,6 +359,142 @@ export class CalibrationPageComponent implements OnInit, OnDestroy{
     return (totalVisibility / detectedLandmarks) * 100;
   }
 
+  private calculateShoulderAngle(landmarks: Array<{x: number, y: number, z: number, visibility?: number}>): number {
+    const leftShoulder = landmarks[this.POSE_LANDMARKS.LEFT_SHOULDER];
+    const rightShoulder = landmarks[this.POSE_LANDMARKS.RIGHT_SHOULDER];
+    const leftHip = landmarks[this.POSE_LANDMARKS.LEFT_HIP];
+    const rightHip = landmarks[this.POSE_LANDMARKS.RIGHT_HIP];
+
+    if (!leftShoulder || !rightShoulder || !leftHip || !rightHip) {
+      return 0;
+    }
+
+    // Calculate midpoints
+    const shoulderMidpoint = {
+      x: (leftShoulder.x + rightShoulder.x) / 2,
+      y: (leftShoulder.y + rightShoulder.y) / 2,
+      z: (leftShoulder.z + rightShoulder.z) / 2
+    };
+
+    const hipMidpoint = {
+      x: (leftHip.x + rightHip.x) / 2,
+      y: (leftHip.y + rightHip.y) / 2,
+      z: (leftHip.z + rightHip.z) / 2
+    };
+
+    // Calculate angle from vertical (ideal posture should be close to 90°)
+    const dx = shoulderMidpoint.x - hipMidpoint.x;
+    const dy = shoulderMidpoint.y - hipMidpoint.y;
+
+    // Calculate angle from vertical axis
+    const angle = Math.abs(Math.atan2(dx, dy) * (180 / Math.PI));
+
+    return angle;
+  }
+
+  private calculateHeadAngle(landmarks: Array<{x: number, y: number, z: number, visibility?: number}>): number {
+    const nose = landmarks[this.POSE_LANDMARKS.NOSE];
+    const leftShoulder = landmarks[this.POSE_LANDMARKS.LEFT_SHOULDER];
+    const rightShoulder = landmarks[this.POSE_LANDMARKS.RIGHT_SHOULDER];
+
+    if (!nose || !leftShoulder || !rightShoulder) {
+      return 0;
+    }
+
+    // Calculate shoulder midpoint
+    const shoulderMidpoint = {
+      x: (leftShoulder.x + rightShoulder.x) / 2,
+      y: (leftShoulder.y + rightShoulder.y) / 2,
+      z: (leftShoulder.z + rightShoulder.z) / 2
+    };
+
+    // Calculate angle from vertical (ideal posture should be close to 90°)
+    const dx = nose.x - shoulderMidpoint.x;
+    const dy = nose.y - shoulderMidpoint.y;
+
+    // Calculate angle from vertical axis
+    const angle = Math.abs(Math.atan2(dx, dy) * (180 / Math.PI));
+
+    return angle;
+  }
+
+  private calculateCalibrationScore(): number {
+    const distanceScore = this.calculateDistanceScore();
+    const visibilityScore = this.calculateVisibilityScore();
+    const shoulderScore = this.calculateShoulderScore();
+    const headScore = this.calculateHeadScore();
+
+    // Weighted average (puedes ajustar los pesos según importancia)
+    const totalScore = (
+      distanceScore * 0.3 +
+      visibilityScore * 0.3 +
+      shoulderScore * 0.2 +
+      headScore * 0.2
+    );
+
+    return Math.round(totalScore);
+  }
+
+  private calculateDistanceScore(): number {
+    const distance = this.cameraDistance();
+
+    // Optimal range: 20-100 cm
+    if (distance >= 20 && distance <= 100) {
+      return 100;
+    }
+
+    // Penalize too close or too far
+    if (distance < 20) {
+      return Math.max(0, 100 - (20 - distance) * 5);
+    }
+
+    return Math.max(0, 100 - (distance - 100) * 2);
+  }
+
+  private calculateVisibilityScore(): number {
+    const visibility = this.cameraVisibility();
+
+    // More than 80% is excellent
+    if (visibility >= 80) {
+      return 100;
+    }
+
+    // Between 60% and 80% is good
+    if (visibility >= 60) {
+      return 60 + ((visibility - 60) / 20) * 40;
+    }
+
+    // Less than 60% is poor
+    return (visibility / 60) * 60;
+  }
+
+  private calculateShoulderScore(): number {
+    const angle = this.shoulderAngle();
+
+    // Optimal range: 85-95° (spine aligned)
+    if (angle >= 85 && angle <= 95) {
+      return 100;
+    }
+
+    // Penalize deviations
+    const deviation = Math.abs(angle - 90);
+    return Math.max(0, 100 - deviation * 2);
+  }
+
+  private calculateHeadScore(): number {
+    const angle = this.headAngle();
+
+    // Optimal range: 85-95° (head aligned)
+    if (angle >= 85 && angle <= 95) {
+      return 100;
+    }
+
+    // Penalize deviations
+    const deviation = Math.abs(angle - 90);
+    return Math.max(0, 100 - deviation * 2);
+  }
+
+
   startCalibration(){
     // Prevent starting calibration if already calibrating
     if (this.isCalibrating()) {
@@ -371,6 +541,15 @@ export class CalibrationPageComponent implements OnInit, OnDestroy{
 
       // Show success message
       toast.success('Calibration finished!');
+
+      // Save calibration details
+      this.saveCalibrationDetails();
+
+      // Clear timeout
+      if (this.calibrationTimeout !== undefined) {
+        clearTimeout(this.calibrationTimeout);
+        this.calibrationTimeout = undefined;
+      }
     }, 5000);
   }
 
@@ -390,4 +569,29 @@ export class CalibrationPageComponent implements OnInit, OnDestroy{
     this.router.navigate(['settings']);
   }
 
+  protected saveCalibrationDetails(): void {
+    const calibrationDetailsId = this.calibrationDetailsId();
+
+    if (!calibrationDetailsId) {
+      toast.error('Calibration details not found');
+      return;
+    }
+
+    const calibrationScore = this.calculateCalibrationScore();
+
+    const calibrationDetailsData = {
+      calibrationScore: calibrationScore,
+      cameraDistance: this.cameraDistance(),
+      cameraVisibility: this.cameraVisibility(),
+      shoulderAngle: Math.round(this.shoulderAngle()),
+      headAngle: Math.round(this.headAngle())
+    };
+
+    this.orchestratorService.updateCalibrationDetails(calibrationDetailsId, calibrationDetailsData).subscribe({
+      next: () => {
+        toast.success(`Calibration saved with score: ${calibrationScore}`);
+      },
+      error: () => toast.error('Error saving calibration details')
+    });
+  }
 }
