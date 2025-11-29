@@ -31,10 +31,17 @@ export class SettingsPageComponent implements OnInit {
   protected readonly visualAlertsEnabled = signal<boolean>(true);
   protected readonly soundAlertsEnabled = signal<boolean>(true);
   protected readonly emailNotificationsEnabled = signal<boolean>(true);
+  protected readonly calibrationScore = signal<number>(0);
+  protected readonly calibrationDate = signal<string>('');
+  protected readonly cameraDistance = signal<number>(0);
+  protected readonly cameraVisibility = signal<number>(0);
+  protected readonly shoulderAngle = signal<number>(0);
+  protected readonly headAngle = signal<number>(0);
 
   private readonly postureSettingId = signal<number | null>(null);
   private readonly alertSettingId = signal<number | null>(null);
   private readonly notificationSettingId = signal<number | null>(null);
+  private readonly calibrationDetailsId = signal<number | null>(null);
 
   private readonly router = inject(Router);
   private readonly orchestratorService = inject(OrchestratorService);
@@ -90,6 +97,21 @@ export class SettingsPageComponent implements OnInit {
         toast.error('Failed to load notification settings');
       }
     });
+
+    this.orchestratorService.getUserCalibrationDetails(userId).subscribe({
+      next: (details) => {
+        this.calibrationDetailsId.set(details.id);
+        this.calibrationScore.set(details.calibrationScore);
+        this.calibrationDate.set(new Date(details.calibratedAt).toLocaleDateString());
+        this.cameraDistance.set(details.cameraDistance);
+        this.cameraVisibility.set(details.cameraVisibility);
+        this.shoulderAngle.set(details.shoulderAngle);
+        this.headAngle.set(details.headAngle);
+      },
+      error: () => {
+        toast.error('Failed to load calibration details');
+      }
+    });
   }
 
   protected saveSettings(): void {
@@ -97,7 +119,7 @@ export class SettingsPageComponent implements OnInit {
     const alertId = this.alertSettingId();
     const notificationId = this.notificationSettingId();
 
-    if (!postureId || !alertId || !notificationId) {
+    if (!postureId || !alertId || !notificationId ) {
       toast.error('Settings not loaded yet');
       return;
     }

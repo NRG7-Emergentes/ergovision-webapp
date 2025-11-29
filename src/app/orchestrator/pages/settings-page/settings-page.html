@@ -91,32 +91,32 @@
           <div class="grid grid-cols-2 gap-4">
             <div class="py-2 px-4 rounded-2xl border border-border text-center bg-muted">
               <p class="text-xs text-muted-foreground">Calibration Score</p>
-              <p class="text-foreground font-semibold"> 92%</p>
+              <p class="text-foreground font-semibold">{{ calibrationScore() }}%</p>
             </div>
 
             <div class="py-2 px-4 rounded-2xl border border-border text-center bg-muted">
               <p class="text-xs text-muted-foreground">Calibration Date</p>
-              <p class="text-foreground font-semibold"> 14/1/2025 </p>
+              <p class="text-foreground font-semibold">{{ calibrationDate() }}</p>
             </div>
 
             <div class="py-2 px-4 rounded-2xl border border-border text-center bg-muted">
               <p class="text-xs text-muted-foreground">Camera Distance</p>
-              <p class="text-foreground font-semibold"> 65.5 cm </p>
+              <p class="text-foreground font-semibold">{{ cameraDistance() }} cm</p>
             </div>
 
             <div class="py-2 px-4 rounded-2xl border border-border text-center bg-muted">
               <p class="text-xs text-muted-foreground">Camera Visibility</p>
-              <p class="text-foreground font-semibold"> 95%</p>
+              <p class="text-foreground font-semibold">{{ cameraVisibility() }}%</p>
             </div>
 
             <div class="py-2 px-4 rounded-2xl border border-border text-center bg-muted">
               <p class="text-xs text-muted-foreground">Shoulder Angle Threshold</p>
-              <p class="text-foreground font-semibold"> 15°</p>
+              <p class="text-foreground font-semibold">{{ shoulderAngle() }}°</p>
             </div>
 
             <div class="py-2 px-4 rounded-2xl border border-border text-center bg-muted">
               <p class="text-xs text-muted-foreground">Head Angle Threshold</p>
-              <p class="text-foreground font-semibold"> 20°</p>
+              <p class="text-foreground font-semibold">{{ headAngle() }}°</p>
             </div>
           </div>
           <button z-button zType="default" class="w-full mt-8" zSize="lg" (click)="goToCalibration()"> Recalibrate</button>
