@@ -7,7 +7,8 @@ import {
   UpdatePostureSetting,
   AlertSetting,
   CreateAlertSetting,
-  UpdateAlertSetting, NotificationSetting, UpdateNotificationSetting, CreateNotificationSetting
+  UpdateAlertSetting, NotificationSetting, UpdateNotificationSetting, CreateNotificationSetting, CalibrationDetails,
+  UpdateCalibrationDetails
 } from '../models/orchestrator.model';
 import { Observable } from 'rxjs';
 
@@ -82,5 +83,14 @@ export class OrchestratorService {
 
   deleteNotificationSetting(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/notification-settings/${id}`);
+  }
+
+  // ===================== CALIBRATION DETAILS =====================
+  getUserCalibrationDetails(userId: number): Observable<CalibrationDetails> {
+    return this.http.get<CalibrationDetails>(`${this.apiUrl}/calibration-details/user/${userId}`);
+  }
+
+  updateCalibrationDetails(id: number, resource: UpdateCalibrationDetails): Observable<number> {
+    return this.http.put<number>(`${this.apiUrl}/calibration-details/${id}`, resource);
   }
 }
