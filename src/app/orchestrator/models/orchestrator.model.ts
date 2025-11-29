@@ -73,3 +73,31 @@ export interface CreateNotificationSetting {
 export interface UpdateNotificationSetting {
   emailNotifications: boolean;
 }
+
+export interface CalibrationDetails {
+  id: number;
+  userId: number;
+  calibrationScore: number;
+  cameraDistance: number;
+  cameraVisibility: number;
+  shoulderAngle: number;
+  headAngle: number;
+  calibratedAt: string;
+}
+
+export interface CreateCalibrationDetails {
+  userId: number;
+  calibrationScore: number;
+  cameraDistance: number;
+  cameraVisibility: number;
+  shoulderAngle: number;
+  headAngle: number;
+}
+
+export interface UpdateCalibrationDetails {
+  calibrationScore: number;
+  cameraDistance: number;
+  cameraVisibility: number;
+  shoulderAngle: number;
+  headAngle: number;
+}
