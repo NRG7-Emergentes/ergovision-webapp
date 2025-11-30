@@ -1,42 +1,29 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { inject } from '@angular/core';
+import { inject, OnInit } from '@angular/core';
 import { DarkModeService } from '@shared/services/darkMode.service';
 import {NavbarComponent} from '@app/public/components/navbar/navbar.component';
 import {FooterComponent} from '@app/public/components/footer/footer.component';
-import {ZardToastComponent} from '@shared/components/toast/toast.component';
-import {AuthenticationService} from '@app/iam/services/authentication.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, ZardToastComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent],
   template: `
-    <div class="font-inter ">
-      @if(authService.isSignedIn()) {
-        <div class="grid min-h-dvh grid-rows-[auto_1fr_auto]">
-          <app-navbar/>
-          <div class="">
-            <router-outlet  />
-            <z-toaster />
-          </div>
-          <app-footer/>
-        </div>
-        } @else {
-        <div class="min-h-dvh">
-          <router-outlet  />
-          <z-toaster />
-        </div>
-      }
+    <div class="grid min-h-dvh grid-rows-[auto_1fr_auto] bg-background font-inter">
+      <app-navbar/>
+      <div class="">
+        <router-outlet  />
+      </div>
+      <app-footer/>
     </div>
   `,
   styles: `
   `
 })
-export class App implements OnInit {
+export class App {
   protected readonly title = signal('ergovision-frontend');
 
   private readonly darkModeService = inject(DarkModeService);
-  protected readonly authService = inject(AuthenticationService);
 
   ngOnInit(): void {
     this.darkModeService.initTheme();
