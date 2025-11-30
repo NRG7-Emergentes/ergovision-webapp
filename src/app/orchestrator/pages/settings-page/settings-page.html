@@ -6,7 +6,7 @@
         <h2 class="text-lg font-bold text-foreground mb-4">Posture</h2>
         <div class="bg-card block border p-6 rounded-lg shadow-sm text-card-foreground w-full">
           <div class="space-y-2 mb-4">
-            <label class="text-sm font-semibold text-foreground">Posture Sensitivity</label>
+            <label class="text-sm font-semibold text-foreground">Nose Offset Sensitivity</label>
             <div class="flex items-center gap-3">
               <z-slider class="w-full" [zMin]="0" [zMax]="100" [zStep]="1" [zValue]="postureSensitivity()"
                         [zDefault]="postureSensitivity()" (onSlide)="postureSensitivity.set($event)" />
