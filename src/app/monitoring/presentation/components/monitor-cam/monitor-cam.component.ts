@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ElementRef, output, viewChild, signal, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, output, input, viewChild, signal, AfterViewInit, OnDestroy } from '@angular/core';
 import { FilesetResolver, PoseLandmarker, DrawingUtils, type PoseLandmarkerResult } from '@mediapipe/tasks-vision';
 
 @Component({
@@ -19,6 +19,10 @@ import { FilesetResolver, PoseLandmarker, DrawingUtils, type PoseLandmarkerResul
   `
 })
 export class MonitorCamComponent implements AfterViewInit, OnDestroy {
+  // Inputs
+  readonly showSkeleton = input<boolean>(false);
+  readonly sampleFrequency = input<number>(1); // 1 = every frame, 5 = one every 5 frames
+
   // Emit pose detection results to parent components
   readonly postureResults = output<PoseLandmarkerResult | null>();
 
@@ -38,6 +42,7 @@ export class MonitorCamComponent implements AfterViewInit, OnDestroy {
   private mediaStream: MediaStream | undefined;
   private onLoadedData: (() => void) | undefined;
   private isDestroyed = false;
+  private frameCounter = 0;
 
   async ngAfterViewInit(): Promise<void> {
     try {
@@ -103,17 +108,31 @@ export class MonitorCamComponent implements AfterViewInit, OnDestroy {
 
       if (!this.poseLandmarker || !this.canvasCtx || !this.drawingUtils) return;
 
+      // Increment frame counter
+      this.frameCounter++;
+
+      // Check if we should process this frame based on sampleFrequency
+      const shouldProcess = this.frameCounter % this.sampleFrequency() === 0;
+
+      if (!shouldProcess) {
+        // Clear canvas if not processing
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        this.canvasCtx!.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+
       const results = this.poseLandmarker.detectForVideo(video, performance.now());
 
       // Resize canvas to match video
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
-      // Draw results
+      // Draw results only if showSkeleton is enabled
       this.canvasCtx!.save();
       this.canvasCtx!.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (results.landmarks) {
+      if (this.showSkeleton() && results.landmarks) {
         for (const landmark of results.landmarks) {
           this.drawingUtils.drawLandmarks(landmark, {
             radius: (data) => DrawingUtils.lerp(data!.from!.z, -0.15, 0.1, 5, 1)
