@@ -3,15 +3,20 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import type { PoseLandmarkerResult } from '@mediapipe/tasks-vision';
 import { toast } from 'ngx-sonner';
+import { forkJoin } from 'rxjs';
 
 import { MonitorCamComponent } from '@app/monitoring/presentation/components/monitor-cam/monitor-cam.component';
 import { ActivePauseDialogComponent } from '@app/monitoring/presentation/components/active-pause-dialog/active-pause-dialog.component';
 import { WebsocketNotificationService } from '@app/notifications/infrastructure/websocket-notification.service';
-import { MonitoringSessionService } from '@app/monitoring/services/monitoring-session.service';
+import { MonitoringSessionService } from '@app/monitoring/presentation/services/monitoring-session.service';
 import { ZardButtonComponent } from '@shared/components/button/button.component';
 import { ZardSwitchComponent } from '@shared/components/switch/switch.component';
 import { ZardSliderComponent } from '@shared/components/slider/slider.component';
 import { ZardDialogService } from '@shared/components/dialog/dialog.service';
+import { MonitoringSession } from '@app/monitoring/presentation/domain/model/monitoring-session';
+import { OrchestratorService } from '@app/orchestrator/services/orchestrator.service';
+import { AuthenticationService } from '@app/iam/services/authentication.service';
+import type { PostureSetting, AlertSetting } from '@app/orchestrator/models/orchestrator.model';
 
 type MonitoringState = 'ACTIVE' | 'PAUSED' | 'FINALIZED';
 
@@ -44,7 +49,10 @@ interface StateNotificationConfig {
         <!-- Camera Feed -->
         <div class="col-span-2 overflow-hidden rounded-lg border">
           <div class="w-full h-auto object-cover block">
-            <app-monitor-cam (postureResults)="handlePostureResults($event)" />
+            <app-monitor-cam
+              [showSkeleton]="showSkeleton()"
+              [sampleFrequency]="sampleFrequency()"
+              (postureResults)="handlePostureResults($event)" />
           </div>
         </div>
 
@@ -137,7 +145,9 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly dialogService = inject(ZardDialogService);
   private readonly wsService = inject(WebsocketNotificationService);
-  private readonly sessionService = inject(MonitoringSessionService);
+  private readonly monitoringSessionService = inject(MonitoringSessionService);
+  private readonly orchestratorService = inject(OrchestratorService);
+  private readonly authService = inject(AuthenticationService);
 
   // State signals
   readonly visualAlerts = signal(true);
@@ -151,8 +161,22 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   readonly isPaused = signal(false);
   readonly pauseTime = signal(0);
   readonly pausesTaken = signal(0);
+  readonly totalPauseDuration = signal(0);
   readonly currentState = signal<MonitoringState>('ACTIVE');
   readonly wsConnected = signal(false);
+
+  // Settings signals (for default/configured values from API)
+  private readonly defaultPostureSensitivity = signal(90);
+  private readonly defaultVisualAlerts = signal(true);
+  private readonly defaultSoundAlerts = signal(true);
+  private readonly defaultAlertVolume = signal(50);
+  private readonly defaultPauseInterval = signal(30);
+  readonly sampleFrequency = signal(1); // 1/1 means every frame
+  readonly showSkeleton = signal(false);
+  readonly settingsLoaded = signal(false);
+
+  // Session tracking
+  private sessionStartTime: Date = new Date();
 
   // Computed signals
   readonly formattedMonitoringTime = computed(() => this.formatTime(this.monitoringTime()));
@@ -189,7 +213,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     },
     FINALIZED: {
       title: 'Monitoring FINALIZED',
-      message: 'Monitoring session has ended',
+      message: 'Monitoring session has ended ',
       toastType: 'info',
       toastDescription: 'Your monitoring session has been saved'
     }
@@ -263,19 +287,96 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.initializeWebSocket();
-    this.initializeAudio();
-    this.startTimers();
-    
-    // Initialize monitoring session
-    console.log('[MonitoringActive] Starting new monitoring session');
-    this.sessionService.startSession();
+    this.loadUserSettings();
   }
 
   ngOnDestroy(): void {
     this.cleanup();
     this.shownNotifications.clear();
   }
+
+  // Private methods - Settings loading
+  private loadUserSettings(): void {
+    const userId = this.authService.getCurrentUserIdSync();
+
+    if (!userId) {
+      console.error('[MonitoringActive] User ID not found, using default settings');
+      this.applyDefaultSettings();
+      this.initializeComponent();
+      return;
+    }
+
+    // Load both settings in parallel
+    forkJoin({
+      postureSettings: this.orchestratorService.getUserPostureSetting(userId),
+      alertSettings: this.orchestratorService.getUserAlertSetting(userId)
+    }).subscribe({
+      next: ({ postureSettings, alertSettings }) => {
+        this.applyUserSettings(postureSettings, alertSettings);
+        this.settingsLoaded.set(true);
+        console.log('[MonitoringActive] Settings loaded successfully:', { postureSettings, alertSettings });
+        this.initializeComponent();
+      },
+      error: (error) => {
+        console.error('[MonitoringActive] Failed to load settings:', error);
+        toast.error('Failed to load settings', {
+          description: 'Using default settings instead',
+          duration: 3000
+        });
+        this.applyDefaultSettings();
+        this.initializeComponent();
+      }
+    });
+  }
+
+  private applyUserSettings(postureSettings: PostureSetting, alertSettings: AlertSetting): void {
+    // Apply posture settings
+    this.defaultPostureSensitivity.set(postureSettings.postureSensitivity);
+    this.noseOffsetSensitivity.set(postureSettings.postureSensitivity);
+    this.sampleFrequency.set(postureSettings.samplingFrequency);
+    this.showSkeleton.set(postureSettings.showSkeleton);
+
+    // Apply alert settings
+    this.defaultVisualAlerts.set(alertSettings.visualAlertsEnabled);
+    this.visualAlerts.set(alertSettings.visualAlertsEnabled);
+    this.defaultSoundAlerts.set(alertSettings.soundAlertsEnabled);
+    this.soundAlerts.set(alertSettings.soundAlertsEnabled);
+    this.defaultAlertVolume.set(alertSettings.alertVolume);
+    this.defaultPauseInterval.set(alertSettings.pauseInterval);
+
+    // Set pause interval in minutes converted to seconds
+    this.nextPauseTime.set(alertSettings.pauseInterval * 60);
+
+    // Set audio volume
+    if (this.beepAudio) {
+      this.beepAudio.volume = alertSettings.alertVolume / 100;
+    }
+  }
+
+  private applyDefaultSettings(): void {
+    // Use hardcoded defaults if API fails
+    this.noseOffsetSensitivity.set(90);
+    this.visualAlerts.set(true);
+    this.soundAlerts.set(true);
+    this.sampleFrequency.set(1);
+    this.showSkeleton.set(false);
+    this.nextPauseTime.set(30 * 60); // 30 minutes default
+
+    this.defaultPostureSensitivity.set(90);
+    this.defaultVisualAlerts.set(true);
+    this.defaultSoundAlerts.set(true);
+    this.defaultAlertVolume.set(50);
+    this.defaultPauseInterval.set(30);
+
+    this.settingsLoaded.set(true);
+  }
+
+  private initializeComponent(): void {
+    this.initializeWebSocket();
+    this.initializeAudio();
+    this.startTimers();
+  }
+
 
   // Public handlers
   handlePostureResults(results: PoseLandmarkerResult | null): void {
@@ -320,44 +421,58 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
   }
 
   finishSession(): void {
-    console.log('[MonitoringActive] Finishing session and saving to backend...');
-    
-    // Update session data with final values
-    const goodPostureTime = this.monitoringTime() - this.badPostureTime();
-    this.sessionService.updateSessionData({
+    this.currentState.set('FINALIZED');
+    this.sendStateNotification('FINALIZED');
+
+    const endDate = new Date();
+    const duration = this.monitoringTime();
+    const goodPostureTime = duration - this.badPostureTime();
+    const averagePauseDuration = this.pausesTaken() > 0
+      ? this.totalPauseDuration() / this.pausesTaken()
+      : 0;
+
+    // Calculate scores (0-100 scale)
+    const goodPosturePercentage = duration > 0 ? (goodPostureTime / duration) * 100 : 0;
+    const badPosturePercentage = duration > 0 ? (this.badPostureTime() / duration) * 100 : 0;
+    const score = Math.round(goodPosturePercentage);
+
+    const sessionData: Omit<MonitoringSession, 'id'> = {
+      startDate: this.sessionStartTime,
+      endDate: endDate,
+      score: score,
+      goodScore: Math.round(goodPosturePercentage),
+      badScore: Math.round(badPosturePercentage),
       goodPostureTime: goodPostureTime,
       badPostureTime: this.badPostureTime(),
+      duration: duration,
       numberOfPauses: this.pausesTaken(),
-      totalPauseTime: this.pauseTime()
-    });
+      averagePauseDuration: Math.round(averagePauseDuration)
+    };
 
-    // Save session to backend/local storage
-    this.sessionService.saveSession().subscribe({
-      next: (response) => {
-        console.log('[MonitoringActive] Session saved successfully:', response);
-        this.currentState.set('FINALIZED');
-        this.sendStateNotification('FINALIZED');
-        
-        toast.success('Session saved', {
-          description: 'Your monitoring session has been saved successfully'
-        });
+    // Create monitoring session
+    this.monitoringSessionService.createMonitoringSession(sessionData).subscribe({
+      next: (session) => {
 
         setTimeout(() => {
           this.router.navigate(['/history']);
         }, 1000);
       },
       error: (error) => {
-        console.error('[MonitoringActive] Error saving session:', error);
-        this.currentState.set('FINALIZED');
-        this.sendStateNotification('FINALIZED');
-        
-        toast.warning('Session saved locally', {
-          description: 'Session was saved locally and will sync when backend is available'
+        console.error('[MonitoringSession] Failed to create:', error);
+
+        if (this.activeToastId) {
+          toast.dismiss(this.activeToastId);
+        }
+
+        this.activeToastId = toast.error('Failed to save session', {
+          description: 'Your session data could not be saved',
+          duration: 4000
         });
 
+        // Still navigate after error to prevent user from being stuck
         setTimeout(() => {
           this.router.navigate(['/history']);
-        }, 1000);
+        }, 2000);
       }
     });
   }
@@ -388,6 +503,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
 
   private initializeAudio(): void {
     this.beepAudio = new Audio('/assets/beep.opus');
+    this.beepAudio.volume = this.defaultAlertVolume() / 100;
     this.beepAudio.load();
   }
 
@@ -404,7 +520,8 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
           const newTime = time - 1;
           if (newTime <= 0) {
             this.initPause();
-            return 30;
+            // Reset to configured interval (in seconds)
+            return this.defaultPauseInterval() * 60;
           }
           return newTime;
         });
@@ -534,6 +651,9 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
       clearInterval(this.pauseTimerIntervalId);
       this.pauseTimerIntervalId = undefined;
     }
+
+    // Accumulate pause duration
+    this.totalPauseDuration.update(total => total + this.pauseTime());
 
     this.isPaused.set(false);
     this.currentState.set('ACTIVE');

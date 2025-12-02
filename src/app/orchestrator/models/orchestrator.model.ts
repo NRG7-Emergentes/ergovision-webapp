@@ -41,7 +41,7 @@ export interface AlertSetting {
   visualAlertsEnabled: boolean;
   soundAlertsEnabled: boolean;
   alertVolume: number;
-  alertInterval: number;
+  pauseInterval: number;
 }
 
 export interface CreateAlertSetting {
@@ -49,12 +49,55 @@ export interface CreateAlertSetting {
   visualAlertsEnabled: boolean;
   soundAlertsEnabled: boolean;
   alertVolume: number;
-  alertInterval: number;
+  pauseInterval: number;
 }
 
 export interface UpdateAlertSetting {
   visualAlertsEnabled: boolean;
   soundAlertsEnabled: boolean;
   alertVolume: number;
-  alertInterval: number;
+  pauseInterval: number;
+}
+
+export interface NotificationSetting {
+  id: number;
+  userId: number;
+  emailNotifications: boolean;
+}
+
+export interface CreateNotificationSetting {
+  userId: number;
+  emailNotifications: boolean;
+}
+
+export interface UpdateNotificationSetting {
+  emailNotifications: boolean;
+}
+
+export interface CalibrationDetails {
+  id: number;
+  userId: number;
+  calibrationScore: number;
+  cameraDistance: number;
+  cameraVisibility: number;
+  shoulderAngle: number;
+  headAngle: number;
+  calibratedAt: string;
+}
+
+export interface CreateCalibrationDetails {
+  userId: number;
+  calibrationScore: number;
+  cameraDistance: number;
+  cameraVisibility: number;
+  shoulderAngle: number;
+  headAngle: number;
+}
+
+export interface UpdateCalibrationDetails {
+  calibrationScore: number;
+  cameraDistance: number;
+  cameraVisibility: number;
+  shoulderAngle: number;
+  headAngle: number;
 }

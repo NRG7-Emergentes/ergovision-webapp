@@ -7,7 +7,8 @@ import {
   UpdatePostureSetting,
   AlertSetting,
   CreateAlertSetting,
-  UpdateAlertSetting
+  UpdateAlertSetting, NotificationSetting, UpdateNotificationSetting, CreateNotificationSetting, CalibrationDetails,
+  UpdateCalibrationDetails
 } from '../models/orchestrator.model';
 import { Observable } from 'rxjs';
 
@@ -44,22 +45,52 @@ export class OrchestratorService {
   // ===================== ALERT SETTINGS =====================
 
   getUserAlertSetting(userId: number): Observable<AlertSetting> {
-    return this.http.get<AlertSetting>(`${this.apiUrl}/alert-settings/user/${userId}`);
+    return this.http.get<AlertSetting>(`${this.apiUrl}/alerts-settings/user/${userId}`);
   }
 
   getAlertSettingById(id: number): Observable<AlertSetting> {
-    return this.http.get<AlertSetting>(`${this.apiUrl}/alert-settings/${id}`);
+    return this.http.get<AlertSetting>(`${this.apiUrl}/alerts-settings/${id}`);
   }
 
   createAlertSetting(resource: CreateAlertSetting): Observable<number> {
-    return this.http.post<number>(`${this.apiUrl}/alert-settings`, resource);
+    return this.http.post<number>(`${this.apiUrl}/alerts-settings`, resource);
   }
 
   updateAlertSetting(id: number, resource: UpdateAlertSetting): Observable<number> {
-    return this.http.put<number>(`${this.apiUrl}/alert-settings/${id}`, resource);
+    return this.http.put<number>(`${this.apiUrl}/alerts-settings/${id}`, resource);
   }
 
   deleteAlertSetting(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/alert-settings/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/alerts-settings/${id}`);
+  }
+
+  // ===================== NOTIFICATION SETTINGS =====================
+  getUserNotificationSetting(userId: number): Observable<NotificationSetting> {
+    return this.http.get<NotificationSetting>(`${this.apiUrl}/notification-settings/user/${userId}`);
+  }
+
+  getNotificationSettingById(id: number): Observable<NotificationSetting> {
+    return this.http.get<NotificationSetting>(`${this.apiUrl}/notification-settings/${id}`);
+  }
+
+  createNotificationSetting(resource: CreateNotificationSetting): Observable<number> {
+    return this.http.post<number>(`${this.apiUrl}/notification-settings`, resource);
+  }
+
+    updateNotificationSetting(id: number, resource: UpdateNotificationSetting): Observable<number> {
+    return this.http.put<number>(`${this.apiUrl}/notification-settings/${id}`, resource);
+  }
+
+  deleteNotificationSetting(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/notification-settings/${id}`);
+  }
+
+  // ===================== CALIBRATION DETAILS =====================
+  getUserCalibrationDetails(userId: number): Observable<CalibrationDetails> {
+    return this.http.get<CalibrationDetails>(`${this.apiUrl}/calibration-details/user/${userId}`);
+  }
+
+  updateCalibrationDetails(id: number, resource: UpdateCalibrationDetails): Observable<number> {
+    return this.http.put<number>(`${this.apiUrl}/calibration-details/${id}`, resource);
   }
 }

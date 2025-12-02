@@ -32,8 +32,30 @@ export class AuthenticationService {
   tryAutoSignIn(): void {
     const token = this.getToken();
     if (!token) return;
+
+    // Restore user data from localStorage
+    const userId = localStorage.getItem('user_id');
+    const username = localStorage.getItem('username');
+    const userRole = localStorage.getItem('user_role');
+    const userImageUrl = localStorage.getItem('user_image_url');
+
     this.isSignedIn.set(true);
-    // Optionally decode token and set user info
+
+    if (userId) {
+      this.userId.set(Number(userId));
+    }
+
+    if (username) {
+      this.username.set(username);
+    }
+
+    if (userRole) {
+      this.userRoles.set([userRole]);
+    }
+
+    if (userImageUrl) {
+      this.userImageUrl.set(userImageUrl);
+    }
   }
 
   /**
@@ -111,6 +133,10 @@ export class AuthenticationService {
         localStorage.setItem('user_id', String(response.id));
         localStorage.setItem('username', response.username);
 
+        if (response.imageUrl) {
+          localStorage.setItem('user_image_url', response.imageUrl);
+        }
+
         if (response.roles && response.roles.length > 0) {
           localStorage.setItem('user_role', response.roles[0]);
         }
@@ -139,6 +165,7 @@ export class AuthenticationService {
     localStorage.removeItem('user_id');
     localStorage.removeItem('username');
     localStorage.removeItem('user_role');
+    localStorage.removeItem('user_image_url');
 
     // Redirect to sign-in
     this.router.navigate(['/sign-in']).then();
@@ -157,6 +184,7 @@ export class AuthenticationService {
   updateUserProfile(imageUrl: string, username?: string): void {
     if (imageUrl) {
       this.userImageUrl.set(imageUrl);
+      localStorage.setItem('user_image_url', imageUrl);
     }
     if (username) {
       this.username.set(username);
