@@ -79,7 +79,7 @@ export class SignInComponent {
 
   protected readonly loginForm = new FormGroup({
     username: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    password: new FormControl('', [Validators.required, Validators.minLength(1)]),
   });
 
   onSubmit() {

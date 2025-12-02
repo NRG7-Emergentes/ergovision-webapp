@@ -18,6 +18,16 @@ export class UserService extends BaseService<User>{
   getUserMe(): Observable<User> {
     return this.http.get<User>(`${this.basePath}${this.resourceEndpoint}/me`);
   }
+  /*  "id": 0,
+  "username": "string",
+  "email": "string",
+  "imageUrl": "string",
+  "age": 0,
+  "height": 0,
+  "weight": 0,
+  "roles": [
+    "ROLE_ADMIN"
+  ]*/
 
   updateProfile(userData: UpdateUserRequest): Observable<SignUpResponse> {
     return this.http.put<SignUpResponse>(`${this.basePath}${this.resourceEndpoint}`, userData);
