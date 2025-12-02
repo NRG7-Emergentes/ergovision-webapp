@@ -684,7 +684,7 @@ export class MonitoringActiveComponent implements OnInit, OnDestroy {
     this.wsService.sendNotification(config.title, config.message);
     console.log(`[WebSocket] Notification sent: ${state}`);
 
-    this.showStateToast(state);
+    //this.showStateToast(state);
   }
 
   private showStateToast(state: MonitoringState): void {
